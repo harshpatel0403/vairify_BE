@@ -1,0 +1,118 @@
+import AWS from 'aws-sdk';
+import fs from 'fs';
+import { readFile, stat } from 'fs/promises';
+const s3 = new AWS.S3({
+    region: process.env.AWS_REGION,
+    accessKeyId: process.env.AWS_ACCESS_TOKEN,
+    secretAccessKey: process.env.AWS_SECERT_TOKEN,
+});
+
+export const uploadToS3 = async (folderName, filePath, fileName, mimeType) => {
+    const chunkSize = 5 * 1024 * 1024; // 5MB
+    try {
+        const fileStats = await stat(filePath);
+        const fileSize = fileStats.size;
+        const totalParts = Math.ceil(fileSize / chunkSize);
+        const timestamp = new Date().toISOString();
+        const uniqueKey = `images/${folderName}/${timestamp}_${fileName}`;
+
+        const multipartParams = {
+            Bucket: process.env.AWS_BUCKET,
+            Key: uniqueKey,
+            ContentType: mimeType,
+            // ACL: 'public-read',
+        };
+
+        const multipartUpload = await s3.createMultipartUpload(multipartParams).promise();
+        const uploadId = multipartUpload.UploadId;
+        const partPromises = [];
+
+        for (let partNumber = 1; partNumber <= totalParts; partNumber++) {
+            const start = (partNumber - 1) * chunkSize;
+            const end = Math.min(start + chunkSize, fileSize);
+            const fileBuffer = await readFile(filePath)
+            const partBuffer = fileBuffer.slice(start, end);
+
+            const partParams = {
+                Body: partBuffer,
+                Bucket: process.env.AWS_BUCKET,
+                Key: uniqueKey,
+                PartNumber: partNumber,
+                UploadId: uploadId,
+            };
+
+            const partPromise = s3.uploadPart(partParams).promise();
+            partPromises.push(partPromise);
+        }
+
+        const partsData = await Promise.all(partPromises);
+
+        const completeParams = {
+            Bucket: process.env.AWS_BUCKET,
+            Key: uniqueKey,
+            MultipartUpload: {
+                Parts: partsData.map((data, index) => ({
+                    ETag: data.ETag,
+                    PartNumber: index + 1,
+                })),
+            },
+            UploadId: uploadId,
+        };
+
+        await s3.completeMultipartUpload(completeParams).promise();
+
+        fs.unlink(filePath,(err)=>{
+            if(err){
+                console.error(`Error removing file ${filePath}`,err);
+            }
+            console.log(`File ${filePath} has been successfully removed`)
+        })
+
+        // const url = `https://${process.env.AWS_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${uniqueKey}`;
+        // return url;
+        console.log("File uploaded and unlinked sucessfully");
+        return uniqueKey
+
+    } catch (error) {
+        console.error('Error uploading file in chunks:', error);
+        throw error;
+    }
+}
+
+export const deleteFilesFromFolder = async (fileUrl) => {
+    try {
+        const urlParts = new URL(fileUrl);
+        const fileKey = urlParts.pathname.substring(1);
+
+        const deleteParams = {
+            Bucket: process.env.AWS_BUCKET,
+            Key: fileKey,
+        };
+
+        await s3.deleteObject(deleteParams).promise();
+        console.log(`File deleted successfully: ${fileKey}`);
+    } catch (error) {
+        console.error('Error deleting file:', error);
+        throw error;
+    }
+};
+
+
+export const fetchS3Files = async () => {
+    try {
+        const response = await s3.listObjectsV2({ Bucket: process.env.AWS_BUCKET }).promise();
+        const files = response.Contents?.map(item => ({
+            key: item.Key,
+            url: s3.getSignedUrl('getObject', {
+                Bucket: process.env.AWS_BUCKET,
+                Key: item.Key,
+                Expires: 60 * 60,
+            }),
+        })) || [];
+        return files;
+    } catch (error) {
+        console.error('Error fetching S3 files:', error);
+        throw error;
+    }
+}
+
