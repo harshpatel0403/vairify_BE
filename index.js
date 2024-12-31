@@ -96,7 +96,7 @@ const io = new Server(server, {
 app.use(bodyParser.json());
 app.set("trust proxy", 1);
 app.use(express.json({ limit: "4mb" }));
-app.use(cors());
+// app.use(cors());
 app.use(
 	cors({
 		origin: '*',
@@ -105,6 +105,7 @@ app.use(
 		credentials: true
 	})
 );
+
 
 
 const webhookSecret = process.env.COMPLYCUBE_WEBHOOK_SECRET;
