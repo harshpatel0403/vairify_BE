@@ -25,11 +25,12 @@ export const getUserVaripays = async (req, res) => {
 
 export const addPaymentInfo = async (req, res) => {
 	try {
-		const { userId, paymentAppName, paymentLink, paymentImage } = req.body;
+		const data = req.fields;
+		const file = req.files;
 		var image = "";
-		const folderName = "user_varipays";
-		if (req.file) {
-			await uploadToS3(folderName, req.file.path, req.file.originalname, req.file.mimetype)
+		if (file) {
+			const folderName = "user_varipays";
+			await uploadToS3(folderName, file.buffer, file.filename.filename, file.filename.mimetype)
 				.then(url => {
 					console.log('File uploaded successfully in Varipay controller:', url);
 					image = url;
@@ -37,14 +38,14 @@ export const addPaymentInfo = async (req, res) => {
 				.catch(err => console.error('Error uploading file in Varipay controller:', err));
 		}
 
-		const filter = { userId };
+		const filter = { userId: data.userId };
 		const update = {
 			$push: {
 				paymentApp: {
-					paymentAppName,
-					paymentLink,
+					paymentAppName: data.paymentAppName,
+					paymentLink: data.paymentLink,
 					qrCode: image,
-					paymentImage: paymentImage,
+					paymentImage: data.paymentImage,
 				},
 			},
 		};

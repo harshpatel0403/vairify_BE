@@ -1,5 +1,5 @@
 import express from "express";
-import multer from "multer";
+// import multer from "multer";
 import moment from "moment";
 import {
   createUser,
@@ -41,6 +41,7 @@ import {
   changePassword,
   uploadFaceVerificationImage,
 } from "../Controllers/UserController.js";
+import { uploadMiddleware } from "../utils/busboyMiddleware.js";
 
 const userRouter = express.Router();
 
@@ -50,77 +51,77 @@ export const userKycProfileDir = `public/userKycImages/`;
 
 export const faceImagesDir = `public/uploads/faceimages`;
 
-const storageProfiles = multer.diskStorage({
-  destination: userProfileDir,
-  filename: function (req, file, callback) {
-    const timestamp = moment().format("YYYYMMDDHHmmss");
-    const originalname = file.originalname.replace(/ /g, ""); // Remove spaces
-    const filename = `${timestamp}-${originalname}`;
-    callback(null, filename);
-  },
-});
+// const storageProfiles = multer.diskStorage({
+//   destination: userProfileDir,
+//   filename: function (req, file, callback) {
+//     const timestamp = moment().format("YYYYMMDDHHmmss");
+//     const originalname = file.originalname.replace(/ /g, ""); // Remove spaces
+//     const filename = `${timestamp}-${originalname}`;
+//     callback(null, filename);
+//   },
+// });
 
-const uploadProfiles = multer({
-  limits: {
-    fileSize: 1000000,
-  },
-  fileFilter(req, file, cb) {
-    if (!file.originalname.match(/\.(png|jpg|jpeg)$/)) {
-      cb(new Error("Please upload an image."));
-    }
-    cb(undefined, true);
-  },
+// const uploadProfiles = multer({
+//   limits: {
+//     fileSize: 1000000,
+//   },
+//   fileFilter(req, file, cb) {
+//     if (!file.originalname.match(/\.(png|jpg|jpeg)$/)) {
+//       cb(new Error("Please upload an image."));
+//     }
+//     cb(undefined, true);
+//   },
 
-  storage: storageProfiles,
-});
+//   storage: storageProfiles,
+// });
 
-const storageFaces = multer.diskStorage({
-  destination: "public/uploads/usersFacesTemp/",
-  filename: function (req, file, callback) {
-    const timestamp = moment().format("YYYYMMDDHHmmss");
-    const originalname = file.originalname.replace(/ /g, ""); // Remove spaces
-    const filename = `${timestamp}-${originalname}`;
-    callback(null, filename);
-  },
-});
+// const storageFaces = multer.diskStorage({
+//   destination: "public/uploads/usersFacesTemp/",
+//   filename: function (req, file, callback) {
+//     const timestamp = moment().format("YYYYMMDDHHmmss");
+//     const originalname = file.originalname.replace(/ /g, ""); // Remove spaces
+//     const filename = `${timestamp}-${originalname}`;
+//     callback(null, filename);
+//   },
+// });
 
-const uploadFaces = multer({
-  limits: {
-    fileSize: 1000000,
-  },
-  fileFilter(req, file, cb) {
-    if (!file.originalname.match(/\.(png|jpg|jpeg)$/)) {
-      cb(new Error("Please upload an image."));
-    }
-    cb(undefined, true);
-  },
+// const uploadFaces = multer({
+//   limits: {
+//     fileSize: 1000000,
+//   },
+//   fileFilter(req, file, cb) {
+//     if (!file.originalname.match(/\.(png|jpg|jpeg)$/)) {
+//       cb(new Error("Please upload an image."));
+//     }
+//     cb(undefined, true);
+//   },
 
-  storage: storageFaces,
-});
+//   storage: storageFaces,
+// });
 
-const storageFaceVerification = multer.diskStorage({
-  destination: faceImagesDir,
-  filename: function (req, file, callback) {
-    const timestamp = moment().format("YYYYMMDDHHmmss");
-    const originalname = file.originalname.replace(/ /g, ""); // Remove spaces
-    const filename = `${timestamp}-${originalname}`;
-    callback(null, filename);
-  },
-});
+// const storageFaceVerification = multer.diskStorage({
+//   destination: faceImagesDir,
+//   filename: function (req, file, callback) {
+//     const timestamp = moment().format("YYYYMMDDHHmmss");
+//     const originalname = file.originalname.replace(/ /g, ""); // Remove spaces
+//     const filename = `${timestamp}-${originalname}`;
+//     callback(null, filename);
+//   },
+// });
 
-const uploadfaceimages = multer({
-  limits: {
-    fileSize: 1000000,
-  },
-  fileFilter(req, file, cb) {
-    if (!file.originalname.match(/\.(png|jpg|jpeg)$/)) {
-      cb(new Error("Please upload an image."));
-    }
-    cb(undefined, true);
-  },
+// const uploadfaceimages = multer({
+//   limits: {
+//     fileSize: 1000000,
+//   },
+//   fileFilter(req, file, cb) {
+//     if (!file.originalname.match(/\.(png|jpg|jpeg)$/)) {
+//       cb(new Error("Please upload an image."));
+//     }
+//     cb(undefined, true);
+//   },
 
-  storage: storageFaceVerification,
-});
+//   storage: storageFaceVerification,
+// });
 
 userRouter.route("/create").post(createUser);
 userRouter.route("/admin/create").post(createUserByAdmin);
@@ -142,16 +143,16 @@ userRouter.post("/verifyOtpCode", verifyOtp);
 userRouter.post("/forgotpassword", forgetPassword);
 userRouter.post("/verifypassword", verifyResetCodeAndResetPassword);
 
-userRouter.post("/verify-face/:userId", uploadFaces.any(), verifyFace);
+userRouter.post("/verify-face/:userId", uploadMiddleware, verifyFace);
 userRouter.post("/save-location/:userId", saveLocation);
 
 userRouter
   .route("/profileUpload")
-  .post(uploadProfiles.single("image"), uploadUserProfile);
+  .post(uploadMiddleware, uploadUserProfile);
 
 userRouter
   .route("/upload-face-verification-image")
-  .post(uploadfaceimages.single("image"), uploadFaceVerificationImage);
+  .post(uploadMiddleware, uploadFaceVerificationImage);
 
 userRouter.route("/all").get(getUsersWithIsTestFalse);
 

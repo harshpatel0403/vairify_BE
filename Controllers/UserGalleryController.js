@@ -7,11 +7,13 @@ import { uploadToS3 } from "../utils/awsS3Functions.js";
 
 export const createUserGallery = async (req, res) => {
 	try {
-		const { userId } = req.body;
+		// const { userId } = req.body;
+		const file = req.files;
+		const userId = req.fields.userId;
 		var image = "";
-		const folderName = "usergallery";
-		if (req.file) {
-			await uploadToS3(folderName, req.file.path, req.file.originalname, req.file.mimetype)
+		if (file) {
+			const folderName = "usergallery";
+			await uploadToS3(folderName, file.buffer, file.filename.filename, file.filename.mimetype)
 				.then(url => {
 					console.log('File uploaded successfully in Gallery controller:', url);
 					image = url;

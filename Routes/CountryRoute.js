@@ -18,114 +18,117 @@ import {
   getSocailForCountry,
   deleteSocialFromCountry,
 } from "../Controllers/CountryController.js";
-import multer from "multer";
-import moment from "moment";
+// import multer from "multer";
+// import moment from "moment";
 
 const countryRouter = express.Router();
 
-const storageCountries = multer.diskStorage({
-  destination: "public/uploads/countries/",
-  filename: function (req, file, callback) {
-    const timestamp = moment().format("YYYYMMDDHHmmss");
-    const originalname = file.originalname.replace(/ /g, ""); // Remove spaces
-    const filename = `${timestamp}-${originalname}`;
-    callback(null, filename);
-  },
-});
+// const storageCountries = multer.diskStorage({
+//   destination: "public/uploads/countries/",
+//   filename: function (req, file, callback) {
+//     const timestamp = moment().format("YYYYMMDDHHmmss");
+//     const originalname = file.originalname.replace(/ /g, ""); // Remove spaces
+//     const filename = `${timestamp}-${originalname}`;
+//     callback(null, filename);
+//   },
+// });
 
-const uploadCountries = multer({
-  limits: {
-    fileSize: 1000000,
-  },
-  fileFilter(req, file, cb) {
-    if (!file.originalname.match(/\.(png|jpg|jpeg)$/)) {
-      cb(new Error("Please upload an image."));
-    }
-    cb(undefined, true);
-  },
+// const uploadCountries = multer({
+//   limits: {
+//     fileSize: 1000000,
+//   },
+//   fileFilter(req, file, cb) {
+//     if (!file.originalname.match(/\.(png|jpg|jpeg)$/)) {
+//       cb(new Error("Please upload an image."));
+//     }
+//     cb(undefined, true);
+//   },
 
-  storage: storageCountries,
-});
+//   storage: storageCountries,
+// });
 
-const storageLanguage = multer.diskStorage({
-  destination: "public/uploads/languages/",
-  filename: function (req, file, callback) {
-    const timestamp = moment().format("YYYYMMDDHHmmss");
-    const originalname = file.originalname.replace(/ /g, ""); // Remove spaces
-    const filename = `${timestamp}-${originalname}`;
-    callback(null, filename);
-  },
-});
+// const storageLanguage = multer.diskStorage({
+//   destination: "public/uploads/languages/",
+//   filename: function (req, file, callback) {
+//     const timestamp = moment().format("YYYYMMDDHHmmss");
+//     const originalname = file.originalname.replace(/ /g, ""); // Remove spaces
+//     const filename = `${timestamp}-${originalname}`;
+//     callback(null, filename);
+//   },
+// });
 
-const uploadLanguages = multer({
-  limits: {
-    fileSize: 1000000,
-  },
-  fileFilter(req, file, cb) {
-    if (!file.originalname.match(/\.(png|jpg|jpeg)$/)) {
-      cb(new Error("Please upload an image."));
-    }
-    cb(undefined, true);
-  },
+// const uploadLanguages = multer({
+//   limits: {
+//     fileSize: 1000000,
+//   },
+//   fileFilter(req, file, cb) {
+//     if (!file.originalname.match(/\.(png|jpg|jpeg)$/)) {
+//       cb(new Error("Please upload an image."));
+//     }
+//     cb(undefined, true);
+//   },
 
-  storage: storageLanguage,
-});
+//   storage: storageLanguage,
+// });
 
-const storageVaripays = multer.diskStorage({
-  destination: "public/uploads/varipays/",
-  filename: function (req, file, callback) {
-    const timestamp = moment().format("YYYYMMDDHHmmss");
-    const originalname = file.originalname.replace(/ /g, ""); // Remove spaces
-    const filename = `${timestamp}-${originalname}`;
-    callback(null, filename);
-  },
-});
+// const storageVaripays = multer.diskStorage({
+//   destination: "public/uploads/varipays/",
+//   filename: function (req, file, callback) {
+//     const timestamp = moment().format("YYYYMMDDHHmmss");
+//     const originalname = file.originalname.replace(/ /g, ""); // Remove spaces
+//     const filename = `${timestamp}-${originalname}`;
+//     callback(null, filename);
+//   },
+// });
 
-const uploadVaripays = multer({
-  limits: {
-    fileSize: 1000000,
-  },
-  fileFilter(req, file, cb) {
-    if (!file.originalname.match(/\.(png|jpg|jpeg)$/)) {
-      cb(new Error("Please upload an image."));
-    }
-    cb(undefined, true);
-  },
+// const uploadVaripays = multer({
+//   limits: {
+//     fileSize: 1000000,
+//   },
+//   fileFilter(req, file, cb) {
+//     if (!file.originalname.match(/\.(png|jpg|jpeg)$/)) {
+//       cb(new Error("Please upload an image."));
+//     }
+//     cb(undefined, true);
+//   },
 
-  storage: storageVaripays,
-});
+//   storage: storageVaripays,
+// });
 
-const storageSocail = multer.diskStorage({
-  destination: "public/uploads/socials/",
-  filename: function (req, file, callback) {
-    const timestamp = moment().format("YYYYMMDDHHmmss");
-    const originalname = file.originalname.replace(/ /g, ""); // Remove spaces
-    const filename = `${timestamp}-${originalname}`;
-    callback(null, filename);
-  },
-});
+// const storageSocail = multer.diskStorage({
+//   destination: "public/uploads/socials/",
+//   filename: function (req, file, callback) {
+//     const timestamp = moment().format("YYYYMMDDHHmmss");
+//     const originalname = file.originalname.replace(/ /g, ""); // Remove spaces
+//     const filename = `${timestamp}-${originalname}`;
+//     callback(null, filename);
+//   },
+// });
 
-const uploadSocial = multer({
-  limits: {
-    fileSize: 1000000,
-  },
-  fileFilter(req, file, cb) {
-    if (!file.originalname.match(/\.(png|jpg|jpeg)$/)) {
-      cb(new Error("Please upload an image."));
-    }
-    cb(undefined, true);
-  },
+// const uploadSocial = multer({
+//   limits: {
+//     fileSize: 1000000,
+//   },
+//   fileFilter(req, file, cb) {
+//     if (!file.originalname.match(/\.(png|jpg|jpeg)$/)) {
+//       cb(new Error("Please upload an image."));
+//     }
+//     cb(undefined, true);
+//   },
 
-  storage: storageSocail,
-});
+//   storage: storageSocail,
+// });
 
 //Route to get all countries
 countryRouter.get("/all", getAllCountries);
 
 // Route to create a new country
 countryRouter
-  .route("/create")
-  .post(uploadCountries.single("image"), createCountry);
+  // .route("/create")
+  .post(
+    "/create"
+    // uploadCountries.single("image")
+    , createCountry);
 
 // Route to update status of country
 countryRouter.put("/:id/status", updateCountryStatus);
@@ -135,8 +138,11 @@ countryRouter.delete("/:id", deleteCountry);
 
 // Route to add lanague to the country
 countryRouter
-  .route("/:id/languages/create")
-  .post(uploadLanguages.single("image"), addLanguageToCountry);
+  // .route("/:id/languages/create")
+  .post(
+    "/:id/languages/create"
+    // uploadLanguages.single("image")
+    , addLanguageToCountry);
 
 // Route to get  selected country languages
 countryRouter.get("/:id/languages", getLanguagesForCountry);
@@ -155,8 +161,11 @@ countryRouter.delete("/:id/cities/:cityId", deleteCityFromCountry);
 
 // Route to create  selected country varipays
 countryRouter
-  .route("/:id/varipays/create")
-  .post(uploadVaripays.single("image"), addVaripayToCountry);
+  // .route("/:id/varipays/create")
+  .post(
+    "/:id/varipays/create"
+    // uploadVaripays.single("image")
+    , addVaripayToCountry);
 
 // Route to get  selected country varipays
 countryRouter.get("/:id/varipays", getVaripaysForCountry);
@@ -165,8 +174,11 @@ countryRouter.get("/:id/varipays", getVaripaysForCountry);
 countryRouter.delete("/:id/varipays/:varipayId", deleteVaripayFromCountry);
 
 countryRouter
-  .route("/:id/social/create")
-  .post(uploadSocial.single("image"), addSocialToCountry);
+  // .route("/:id/social/create")
+  .post(
+    "/:id/social/create"
+    // uploadSocial.single("image")
+    , addSocialToCountry);
 
 countryRouter.get("/:id/social", getSocailForCountry);
 

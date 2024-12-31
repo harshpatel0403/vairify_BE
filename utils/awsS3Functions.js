@@ -1,17 +1,15 @@
 import AWS from 'aws-sdk';
-import fs from 'fs';
-import { readFile, stat } from 'fs/promises';
 const s3 = new AWS.S3({
     region: process.env.AWS_REGION,
     accessKeyId: process.env.AWS_ACCESS_TOKEN,
     secretAccessKey: process.env.AWS_SECERT_TOKEN,
 });
 
-export const uploadToS3 = async (folderName, filePath, fileName, mimeType) => {
+export const uploadToS3 = async (folderName, fileBuffer, fileName, mimeType) => {
     const chunkSize = 5 * 1024 * 1024; // 5MB
     try {
-        const fileStats = await stat(filePath);
-        const fileSize = fileStats.size;
+
+        const fileSize = fileBuffer.length;
         const totalParts = Math.ceil(fileSize / chunkSize);
         const timestamp = new Date().toISOString();
         const uniqueKey = `images/${folderName}/${timestamp}_${fileName}`;
@@ -30,7 +28,6 @@ export const uploadToS3 = async (folderName, filePath, fileName, mimeType) => {
         for (let partNumber = 1; partNumber <= totalParts; partNumber++) {
             const start = (partNumber - 1) * chunkSize;
             const end = Math.min(start + chunkSize, fileSize);
-            const fileBuffer = await readFile(filePath)
             const partBuffer = fileBuffer.slice(start, end);
 
             const partParams = {
@@ -61,17 +58,8 @@ export const uploadToS3 = async (folderName, filePath, fileName, mimeType) => {
 
         await s3.completeMultipartUpload(completeParams).promise();
 
-        fs.unlink(filePath,(err)=>{
-            if(err){
-                console.error(`Error removing file ${filePath}`,err);
-            }
-            console.log(`File ${filePath} has been successfully removed`)
-        })
-
-        // const url = `https://${process.env.AWS_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${uniqueKey}`;
-        // return url;
-        console.log("File uploaded and unlinked sucessfully");
-        return uniqueKey
+        console.log("File uploaded sucessfully to aws s3.");
+        return uniqueKey;
 
     } catch (error) {
         console.error('Error uploading file in chunks:', error);

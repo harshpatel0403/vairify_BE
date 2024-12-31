@@ -11,8 +11,11 @@ import { uploadToS3 } from "../utils/awsS3Functions.js";
 
 export const saveAppointment = async (req, res) => {
     try {
-        var { data } = req.body
-        data = JSON.parse(data)
+        // var { data } = req.body
+        var data = JSON.parse(req.fields.data)
+        const file = req.files || []
+        const folderName = "manualSelfies";
+
         const { startDateTime, type, clientId, companionId, clientStatus, companionStatus, service } = data
         if (!startDateTime || !type || !clientId || !companionId || !clientStatus || !companionStatus) {
             return res.status(400).json({ error: "Invalid Request!" })
@@ -20,23 +23,23 @@ export const saveAppointment = async (req, res) => {
 
         const user = await User.findById(clientId)
 
-        const [file] = req.files || []
+        // const [file] = req.files || []
 
         let image;
         if (file) {
-            await uploadToS3("faceimages", file.path, file.filename, file.mimetype)
-            .then((res) => {
-                image = res;
-                console.log(res, "Image link")
-            })
-            .catch((err) => {
-                console.log("Error Upload manualSelfies", err);
-            });
+            await uploadToS3(folderName, file.buffer, file.filename.filename, file.filename.mimeType)
+                .then((res) => {
+                    image = res;
+                    console.log(res, "Image link")
+                })
+                .catch((err) => {
+                    console.log("Error Upload manualSelfies", err);
+                });
 
             data.manualSelfie = {
                 file: image,
                 // file: file.filename,
-                path: file.path
+                path: ""
             }
         }
 
@@ -646,55 +649,50 @@ export const getAppointment = async (req, res) => {
 export const updateAppointment = async (req, res) => {
     try {
         const { userId, appointmentId } = req.params
-
         const user = await User.findById(userId)
-
         if (!user) {
             return res.status(400).send({ error: "User not found" })
         }
-
         const { user_type } = user
-
         const appointment = await Appointment.findById(appointmentId)
-
         if (user_type === 'client-hobbyist' && appointment?.clientId?.toString() !== userId) {
             return res.status(400).send({ error: 'You do not have permission to update this appointment' })
         }
-
         if ((user_type === 'agency-business' || user_type === 'companion-provider') && appointment?.companionId?.toString() !== userId) {
             return res.status(400).send({ error: 'You do not have permission to update this appointment' })
         }
+        const file = req.files || [];
+        var data = req.fields;
 
-        const [file] = req.files || []
-
-        var data = req.body
-        if (file) {
-            data = JSON.parse(req.body.data)
+        var image;
+        const folderName = "manualSelfies";
+        if (file.length > 0) {
+            await uploadToS3(folderName, file.buffer, file.filename.filename, file.filename.mimetype)
+                .then((res) => {
+                    image = res;
+                })
+                .catch((err) => {
+                    console.log("Error Upload manualSelfies", err);
+                });
             data.manualSelfieCompanion = {
-                file: file.filename,
-                path: file.path
+                file: image,
+                path: ""
             }
         }
-
         const appt = await Appointment.findById(appointmentId);
-
         if (!appt) {
             return res.status(400).send({ error: "Appointment not found" })
         }
-
         if (appt.type == 'vairify-now' && data.clientStatus === 'Scheduled' && data.companionStatus === 'Scheduled') {
             const resp = await User.updateOne({ _id: appt?.companionId?.toString() }, { $set: { ['vaiNowAvailable.duration']: 0 } })
             console.log(resp, ' <== I am response of the update...')
         }
-
         const response = await Appointment.findOneAndUpdate({ _id: appointmentId }, {
             $set: data
         }, { new: true }).populate('companionId').populate('clientId')
-
         if ((data?.clientStatus === "Sign Pending") && (data?.companionStatus === "Signed")) {
             await sendNotification(response?.companionId?._id, response?.clientId?._id, "APPOINTMENT_REQUEST", "Appointment request updated", `${response?.companionId?.name} has updated the appointment`)
         }
-
         if ((data?.companionStatus === "Rejected")) {
             if (response?.type === "vairify-now") {
                 await sendNotification(response?.companionId?._id, response?.clientId?._id, "VAIRIFY_NOW", "Vairify now request rejected", `${response?.companionId?.name} has rejected the vairify now appointment`)
@@ -702,11 +700,9 @@ export const updateAppointment = async (req, res) => {
                 await sendNotification(response?.companionId?._id, response?.clientId?._id, "APPOINTMENT_REQUEST", "Appointment request rejected", `${response?.companionId?.name} has rejected the appointment`)
             }
         }
-
         if ((data?.clientStatus === "Cancel")) {
             await sendNotification(response?.clientId?._id, response?.companionId?._id, "APPOINTMENT_REQUEST", "Appointment request cancelled", `${response?.clientId?.name} has rejected the appointment`)
         }
-
         if ((data?.clientStatus === "Scheduled") && (data?.companionStatus === "Scheduled")) {
             if (response?.type === "vairify-now") {
                 await sendNotification(response?.companionId?._id, response?.clientId?._id, "VAIRIFY_NOW", "Vairify now request updated", `${response?.companionId?.name} has updated the vairify now appointment`)
@@ -714,22 +710,17 @@ export const updateAppointment = async (req, res) => {
                 await sendNotification(response?.clientId?._id, response?.companionId?._id, "APPOINTMENT_REQUEST", "Appointment request updated", `${response?.clientId?.name} has updated the appointment`)
             }
         }
-
         if ((data?.vaiCheckStatus?.clientStatus === "Verified") && (data?.vaiCheckStatus?.companionStatus === "Pending")) {
             await sendNotification(response?.clientId?._id, response?.companionId?._id, "VAIRIFY_NOW", "Vairify now request verified", `${response?.clientId?.name} has verified the vairify now appointment`)
         }
-
         if ((data?.vaiCheckStatus?.clientStatus === "Verified") && (data?.vaiCheckStatus?.companionStatus === "Verified")) {
             await sendNotification(response?.companionId?._id, response?.clientId?._id, "VAIRIFY_NOW", "Vairify now request verified", `${response?.companionId?.name} has verified the vairify now appointment`)
         }
-
         return res.send(response)
-
     } catch (error) {
         return res.status(500).json(error)
     }
 }
-
 
 export const postReview = async (req, res) => {
     try {

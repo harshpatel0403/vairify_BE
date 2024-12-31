@@ -392,14 +392,14 @@ const getAlarm = async (req, res) => {
 
 const uploadProof = async (req, res) => {
   try {
-    const { groupId, appointmentId, message } = req.body
-    const [file] = req.files
+    const data = req.fields;
+    const file = req.files;
 
     if (!file) {
       return res.status(400).send({ error: "Please upload proof" })
     }
 
-    const group = await DateGuardGroup.findOne({ _id: groupId });
+    const group = await DateGuardGroup.findOne({ _id: data.groupId });
 
     if (!group) {
       return res.status(404).json({ error: 'Group not found' });
@@ -407,29 +407,26 @@ const uploadProof = async (req, res) => {
 
     // TODO: add validation for appointment exists here
 
-    const existingAlarm = await DateGuardAlarms.findOne({ groupId, appointmentId })
+    const existingAlarm = await DateGuardAlarms.findOne({ groupId: data.groupId, appointmentId: data.appointmentId })
     if (!existingAlarm) {
       return res.status(400).send({ error: 'No alarms set for this appointment' })
     }
-    let imageURL;
+    var imageURL;
+    if (file) {
 
-    await uploadToS3('dateguard', file.path, file.filename, file.mimetype)
-      .then(url => {
-        console.log('File uploaded successfully in DateGuard:', url);
-        imageURL = url;
-      })
-      .catch(err => console.error('Error uploading file in Dateguard:', err));
+      const folderName = 'dateguard';
+      await uploadToS3(folderName, file.buffer, file.filename.filename, file.filename.mimetype)
+        .then(url => {
+          console.log('File uploaded successfully in DateGuard:', url);
+          imageURL = url;
+        })
+        .catch(err => console.error('Error uploading file in Dateguard:', err));
+    }
 
-    fs.unlink(req.file.path, (err) => {
-      if (err) {
-        console.error("Error removing file :", err);
-      }
-      console.log(`File ${req.file.path} has been successfully removed.`);
-    })
     existingAlarm.proof = {
-      message,
+      message: data.message,
       file: imageURL,
-      path: file.path
+      path: imageURL
     }
 
     await existingAlarm.save()

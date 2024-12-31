@@ -644,7 +644,7 @@ const loginUser = async (req, res) => {
 	try {
 
 		const { email, password } = req.body;
-		const user = await User.findOne({ email: "rajv@gmail.com" });
+		const user = await User.findOne({ email: email });
 
 		if (user && bcrypt.compareSync(password, user.password)) {
 			const resetCode = Math.floor(
@@ -682,20 +682,20 @@ const loginUser = async (req, res) => {
 				},
 			}
 
-			// const poller = await emailClient.beginSend(emailMessage);
-			// const response = await poller.pollUntilDone();
+			const poller = await emailClient.beginSend(emailMessage);
+			const response = await poller.pollUntilDone();
 
-			// if (response?.status === 'Succeeded') {
-			// 	return res.json({
-			// 		message: "Email has been sent",
-			// 	});
-			// }
-			// else {
-			// 	return res.json({
-			// 		message: "Email can not be sent",
-			// 		err,
-			// 	});
-			// }
+			if (response?.status === 'Succeeded') {
+				return res.json({
+					message: "Email has been sent",
+				});
+			}
+			else {
+				return res.json({
+					message: "Email can not be sent",
+					err,
+				});
+			}
 
 			return res.json({
 				message: "message sent",
@@ -1169,7 +1169,7 @@ const verifyOtp = async (req, res) => {
 	const { email, otpCode } = req.body;
 
 	try {
-		const user = await User.findOne({ email: "rajv@gmail.com" });
+		const user = await User.findOne({ email });
 
 		if (!user) {
 			return res.status(401).json({
@@ -1256,10 +1256,21 @@ export const addTokensToUser = async (req, res) => {
 
 const uploadUserProfile = async (req, res) => {
 	try {
-		const userId = req.body.userId;
+		const files = req.files;
+		const fields = req.fields;
+		console.log(files, "File and Feilds");
+
+		console.log(files.filename.filename, files.filename.mimeType, files.buffer, fields.userId, "File and Feilds");
 		var image = "";
-		if (req.file) {
-			await uploadToS3("usersProfile", req.file.path, req.file.filename, req.file.mimetype)
+
+		// const timestamp = moment().format("YYYYMMDDHHmmss");
+		// const originalname = req.file.originalname.replace(/ /g, "");
+
+		// const filename = `${timestamp}-${originalname}`;
+		// image = filename;
+
+		if (files) {
+			await uploadToS3("usersProfile", files.buffer, files.filename.filename, files.filename.mimeType)
 				.then((res) => {
 					image = res;
 					console.log(res, "Image link")
@@ -1267,16 +1278,10 @@ const uploadUserProfile = async (req, res) => {
 				.catch((err) => {
 					console.log("Error Upload Profile", err);
 				});
-
-			// console.log(req.file,"upload profie")
-			// const timestamp = moment().format("YYYYMMDDHHmmss");
-			// const originalname = req.file.originalname.replace(/ /g, ""); // Remove spaces
-
-			// const filename = `${timestamp}-${originalname}`;
-			// image = filename;
 		}
+		console.log(image, "uploadFaceVerificationImage  profie")
 
-		const userProfile = await User.findByIdAndUpdate(userId, {
+		const userProfile = await User.findByIdAndUpdate(fields.userId, {
 			profilePic: image,
 		});
 
@@ -1298,11 +1303,12 @@ const uploadUserProfile = async (req, res) => {
 
 const uploadFaceVerificationImage = async (req, res) => {
 	try {
-		const userId = req.body.userId;
-		var image = "";
+		const userId = req.fields.userId;
+		const files = req.files || [];
 		const folderName = "faceimages";
-		if (req.file) {
-			await uploadToS3(folderName, req.file.path, req.file.originalname, req.file.mimetype)
+		var image = "";
+		if (files) {
+			await uploadToS3(folderName, files.buffer, files.filename.filename, files.filename.mimeType)
 				.then(url => {
 					console.log('File uploaded successfully in Marketplace post:', url);
 					image = url;
@@ -1356,14 +1362,18 @@ const checkUserPassword = async (req, res) => {
 };
 
 const verifyFace = async (req, res) => {
-	const [file] = req.files;
-	console.log(file, "file is this")
-	if (!file) {
-		return res.status(400).send({ error: "Please upload proof" });
-	}
 	try {
 		const { userId } = req.params;
-		await uploadToS3("usersFacesTemp", file.path, file.filename, file.mimetype)
+		const file = req.files;
+		const folderName = "usersFacesTemp";
+
+		// const [file] = req.files;
+		if (!file) {
+			return res.status(400).send({ error: "Please upload proof" });
+		}
+
+		var image = "";
+		await uploadToS3(folderName, file.buffer, file.filename.filename, file.filename.mimeType)
 			.then((res) => {
 				image = res;
 				console.log(res, "Image link")
@@ -1371,7 +1381,6 @@ const verifyFace = async (req, res) => {
 			.catch((err) => {
 				console.log("Error Upload Profile", err);
 			});
-
 		const user = await User.findOne({ _id: userId });
 		const kyc = await KYCDetails.findOne({ userId });
 

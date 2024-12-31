@@ -4,9 +4,6 @@ import Country from "../Models/Countries.js";
 export const getAllCountries = async (req, res) => {
 	try {
 		const countries = await Country.find();
-		console.log('====================================');
-		console.log(countries);
-		console.log('====================================');
 		res.status(200).json(countries);
 	} catch (error) {
 		res.status(500).json({
@@ -16,12 +13,12 @@ export const getAllCountries = async (req, res) => {
 };
 
 export const createCountry = async (req, res) => {
-
+	
 	try {
 		let image = null;
 		if (req.file) {
-			image = req.file.originalname.replace(/ /g, "");
-
+			image  = req.file.originalname.replace(/ /g, "");
+			
 		}
 
 		const country = new Country({

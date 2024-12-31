@@ -9,6 +9,7 @@ import { sendNotification } from "../Config/utils.js";
 import { uploadToS3, deleteFilesFromFolder } from "../utils/awsS3Functions.js";
 import fs from 'fs';
 
+
 export const getAllMarketPost = async (req, res) => {
 	try {
 		let currentDate = moment().format('DD/MM/YYYY')
@@ -120,20 +121,23 @@ export const getAllMarketPost = async (req, res) => {
 	}
 };
 export const createMarketPost = async (req, res) => {
-	const data = req.body;
-	console.log(data);
-	try {
-		const folderName = "marketplacePost";
 
+	try {
+
+		const data = req.fields;
+		const file = req.files;
 		var image = "";
-		if (req.file) {
-			await uploadToS3(folderName, req.file.path, req.file.originalname, req.file.mimetype)
+
+		if (file) {
+			const folderName = "marketplacePost";
+			await uploadToS3(folderName, file.buffer, file.filename.filename, file.filename.mimetype)
 				.then(url => {
 					console.log('File uploaded successfully in Marketplace post:', url);
 					image = url;
 				})
 				.catch(err => console.error('Error uploading file in Marketplace post:', err));
 		}
+
 		data.image = image;
 		const user = await User.findById(data.userId);
 		const profile = await profileDetails.findOne({ userId: data.userId });
@@ -196,6 +200,8 @@ export const createMarketPost = async (req, res) => {
 			message: "Post created successfully",
 			MarketPost,
 		});
+
+
 	} catch (error) {
 		console.log(error, " <=== error....");
 		res.status(500).json({

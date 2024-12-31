@@ -27,8 +27,20 @@ function isValidEmail(email) {
 
 export const createNewStaff = async (req, res) => {
   try {
-    const { email, name, userType, description, userId } = req.body;
-    const currentUser = await User.findById(userId);
+    const file = req.files;
+    const data = req.fields;
+    var image = "";
+    if (file) {
+      const folderName = "usersProfile";
+      await uploadToS3(folderName, file.buffer, file.filename.filename, file.filename.mimetype)
+        .then(url => {
+          console.log('File uploaded successfully in Staff controller:', url);
+          image = url;
+        })
+        .catch(err => console.error('Error uploading file in Staff controller:', err));
+    }
+
+    const currentUser = await User.findById(data.userId);
     if (!currentUser) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -39,14 +51,14 @@ export const createNewStaff = async (req, res) => {
         .json({ error: "You are not authorized to manage Business Staff" });
     }
 
-    if(!name){
+    if (!data.name) {
       return res.status(404).json({ error: "Invalid name" })
     }
 
-    if (!email || !isValidEmail(email)) {
+    if (!data.email || !isValidEmail(data.email)) {
       return res.status(404).json({ error: "Invalid Email" });
     } else {
-      const checkEmail = await User.findOne({ email: email });
+      const checkEmail = await User.findOne({ email: data.email });
       if (checkEmail) {
         return res.status(400).json({ data: "This email is already in use." });
       }
@@ -59,29 +71,27 @@ export const createNewStaff = async (req, res) => {
     const encryptedPassword = await bcrypt.hash(temporaryPassword, 10);
 
     let user_type = "";
-    if (userType == "admin") {
+    if (data.userType == "admin") {
       user_type = "admin_staff";
-    } else if (userType == "staff") {
+    } else if (data.userType == "staff") {
       user_type = "service_staff";
     } else {
       return res.status(404).json({ error: "Invalid User Type" });
     }
 
     const user = new User({
-      email,
-      name,
+      email: data.email,
+      name: data.name,
       user_type,
-      description,
+      description: data.description,
       staff_parent: currentUser._id,
       password: encryptedPassword, // Store the encrypted password
     });
 
-    if (req.file) {
-      user.profilePic = req.file.filename;
-    }
+    user.profilePic = image;
     await user.save();
     const emailBody = {
-      to: email, // Using the provided "verifyId" as the recipient
+      to: data.email, // Using the provided "verifyId" as the recipient
       subject: "Temporary Password for Vairify App Access",
       html: `
         <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
@@ -91,7 +101,7 @@ export const createNewStaff = async (req, res) => {
             <p style="font-size: 14px; text-align: left;">You have been added as a staff member by ${currentUser.name} on Vairify.</p>
             <div style="margin-bottom: 20px;"></div>
             <p style="font-size: 14px; text-align: left;">Please have a look at your credentials below:</p>
-            <p style="font-size: 14px; text-align: left;">User ID: ${email}</p>
+            <p style="font-size: 14px; text-align: left;">User ID: ${data.email}</p>
             <p style="font-size: 14px; text-align: left;">Temporary Password: ${temporaryPassword}</p>
             <div style="margin-bottom: 20px;"></div>
             <p style="font-size: 12px; text-align: left;">For security, change your password soon.</p>
@@ -111,7 +121,7 @@ export const createNewStaff = async (req, res) => {
     return res.json({
       message:
         "Staff profile created successfully, and email sent with temporary password.",
-      user: user, // Include the user data in the response
+      user: user,
     });
   } catch (err) {
     console.error(err);
