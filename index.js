@@ -97,6 +97,13 @@ app.use(bodyParser.json());
 app.set("trust proxy", 1);
 app.use(express.json({ limit: "4mb" }));
 app.use(cors());
+app.use(
+	cors({
+		origin: '*',
+		methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+		allowedHeaders: ['Content-Type', 'Authorization'],
+	})
+);
 
 const webhookSecret = process.env.COMPLYCUBE_WEBHOOK_SECRET;
 const complycube = new ComplyCube({ apiKey: process.env.COMPLYCUBE_API_TOKEN });
@@ -505,7 +512,7 @@ app.post("/api/v1/stripe/subscribe-membership", async (req, res) => {
 
 			expiryDateMembership.setDate(
 				expiryDateMembership.getDate() +
-					parseInt(membershipFreePlan.days ?? 0),
+				parseInt(membershipFreePlan.days ?? 0),
 			);
 			subscriptionDetail = {
 				planId: membershipFreePlan._id,
@@ -686,91 +693,91 @@ app.post("/api/v1/stripe/webhook", async (request, response) => {
 });
 
 app.post("/webhook", bodyParser.json(), async (request, response) => {
-    try {
-        const signature = request.headers["complycube-signature"];
-        const { body } = request;
-        const event = eventVerifier.constructEvent(JSON.stringify(body), signature);
+	try {
+		const signature = request.headers["complycube-signature"];
+		const { body } = request;
+		const event = eventVerifier.constructEvent(JSON.stringify(body), signature);
 
 		const checkId = event.payload.id;
 		const clientIdCome = event.payload.clientId;
 
 
-        const kycDetail = await KYCDetails.findOne({
-            $or: [{ checkId }, { documentCheckId: checkId }],
-        }).exec();
+		const kycDetail = await KYCDetails.findOne({
+			$or: [{ checkId }, { documentCheckId: checkId }],
+		}).exec();
 
-        switch (event.type) {
-            case "check.completed": {
-	
+		switch (event.type) {
+			case "check.completed": {
+
 				const checkOutCome = event.payload.outcome;
 
-                const userId = await User.findOne({ complyUserId: clientIdCome });
-                console.log("The checkOutCome is: ", checkOutCome);
+				const userId = await User.findOne({ complyUserId: clientIdCome });
+				console.log("The checkOutCome is: ", checkOutCome);
 
-                const checkResults = await complycube.check.get(checkId);
+				const checkResults = await complycube.check.get(checkId);
 
-                if (checkOutCome === "clear") {
-                    console.log("checkouit come is clear now");
+				if (checkOutCome === "clear") {
+					console.log("checkouit come is clear now");
 
-                    if (checkResults.type === "document_check") {
-                        
-                        await updateKYCDetails(userId, { documentCheckResult: checkResults.outcome });
-                   
-                    } else if (checkResults.type === "identity_check") {
-                        
-                        await updateKYCDetails(userId, { identityCheckResult: checkResults.outcome });
-                      
-                    }
+					if (checkResults.type === "document_check") {
 
-                    const userkycDetail = await KYCDetails.findOne({
-                        userId,
-                        documentCheckResult: "clear",
-                        identityCheckResult: "clear",
-                    });
+						await updateKYCDetails(userId, { documentCheckResult: checkResults.outcome });
 
-                    if (userkycDetail) {
-                        await updateUserKYCStatus(userId, true);
-                    } else {
-                        console.log("user with 2 clear checks not found!");
-                    }
-                } else if (checkOutCome === "attention") {
-                    if (checkResults.type === "identity_check") {
-                        await updateUserKYCStatus(userId, false);
-                    } else if (checkResults.type === "document_check") {
-                        const { contentAnalysis, blackListCheck } = checkResults.outcome.breakdown;
+					} else if (checkResults.type === "identity_check") {
 
-                        if (contentAnalysis.expirationDate === "attention") {
-                            console.log("The document is expired");
-                            await updateUserKYCStatus(userId, false);
-                        }
+						await updateKYCDetails(userId, { identityCheckResult: checkResults.outcome });
 
-                        if (blackListCheck === "attention") {
-                            await User.updateOne({ _id: kycDetail.userId }, { isKycFailed: true });
-                        }
-                    }
-                }
-                break;
-            }
-            case "check.pending":
-                console.log(`Check ${checkId} is pending`);
-                break;
-            default:
-                return response.status(400).end();
-        }
+					}
 
-        response.json({ received: true });
-    } catch (error) {
-        console.error("Webhook Error: ", error.message);
-        response.status(400).send(`Webhook Error: ${error.message}`);
-    }
+					const userkycDetail = await KYCDetails.findOne({
+						userId,
+						documentCheckResult: "clear",
+						identityCheckResult: "clear",
+					});
+
+					if (userkycDetail) {
+						await updateUserKYCStatus(userId, true);
+					} else {
+						console.log("user with 2 clear checks not found!");
+					}
+				} else if (checkOutCome === "attention") {
+					if (checkResults.type === "identity_check") {
+						await updateUserKYCStatus(userId, false);
+					} else if (checkResults.type === "document_check") {
+						const { contentAnalysis, blackListCheck } = checkResults.outcome.breakdown;
+
+						if (contentAnalysis.expirationDate === "attention") {
+							console.log("The document is expired");
+							await updateUserKYCStatus(userId, false);
+						}
+
+						if (blackListCheck === "attention") {
+							await User.updateOne({ _id: kycDetail.userId }, { isKycFailed: true });
+						}
+					}
+				}
+				break;
+			}
+			case "check.pending":
+				console.log(`Check ${checkId} is pending`);
+				break;
+			default:
+				return response.status(400).end();
+		}
+
+		response.json({ received: true });
+	} catch (error) {
+		console.error("Webhook Error: ", error.message);
+		response.status(400).send(`Webhook Error: ${error.message}`);
+	}
 });
 
 async function updateKYCDetails(userId, update) {
-    await KYCDetails.updateOne({ userId }, update);
+	await KYCDetails.updateOne({ userId }, update);
 }
 
 async function updateUserKYCStatus(userId, status) {
-    await User.updateOne({ _id: userId }, { isKycCompleted: status });
+	await User.updateOne({ _id: userId }, { isKycCompleted: status });
 }
 
 app.use((err, req, res, next) => {
@@ -899,3 +906,5 @@ const PORT = process.env.PORT || 5000;
 server.listen(PORT, () =>
 	console.log(`server running on port http://localhost:${PORT}`),
 );
+
+export default app;

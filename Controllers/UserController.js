@@ -697,9 +697,9 @@ const loginUser = async (req, res) => {
 				});
 			}
 
-			return res.json({
-				message: "message sent",
-			});
+			// return res.json({
+			// 	message: "message sent",
+			// });
 
 		}
 		else {
