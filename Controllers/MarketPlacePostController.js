@@ -41,23 +41,19 @@ export const getAllMarketPost = async (req, res) => {
 		otherPosts = JSON.parse(JSON.stringify(otherPosts))
 		var posts = [...featuredPosts, ...otherPosts]
 
-		console.log('====================================');
-		console.log("posts", posts);
-		console.log('====================================');
-		const currentDateTime = moment().utc();  // Or .utc() if you need UTC time
-		console.log('Current Time:', currentDateTime.format());
+		const currentDateTime = moment().local();
 
 		posts = posts?.filter(post => {
-			const startTime = moment(`${post.date.from} ${post.time.from}`, 'DD/MM/YYYY hh:mm A').utc();  // Convert to local time
-			const endTime = moment(`${post.date.to} ${post.time.to}`, 'DD/MM/YYYY hh:mm A').utc();  // Convert to local time
+			const startTime = moment(`${post.date.from} ${post.time.from}`, 'DD/MM/YYYY hh:mm A');
+			const endTime = moment(`${post.date.to} ${post.time.to}`, 'DD/MM/YYYY hh:mm A');
 
 			console.log('Start Time:', startTime.format());
 			console.log('End Time:', endTime.format());
-
-			console.log('Is Between:', currentDateTime.isBetween(startTime, endTime, null, '[]'));  // Include boundaries
+			console.log('Current Time:', currentDateTime.format());
 
 			return currentDateTime.isBetween(startTime, endTime, null, '[]');
 		});
+
 
 		// posts = posts?.filter(post => moment().isBetween(moment(post.time.from, 'hh:mm A'), moment(post.time.to, 'hh:mm A')))
 		console.log('====================================');
