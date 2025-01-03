@@ -41,14 +41,19 @@ export const getAllMarketPost = async (req, res) => {
 		otherPosts = JSON.parse(JSON.stringify(otherPosts))
 		var posts = [...featuredPosts, ...otherPosts]
 
-		posts = posts.filter(post => moment().isBetween(moment(post.time.from, 'hh:mm A'), moment(post.time.to, 'hh:mm A')))
+		posts = posts?.filter(post => moment().isBetween(moment(post.time.from, 'hh:mm A'), moment(post.time.to, 'hh:mm A')))
 
 		// Calculate totalComments and totalLikes for each post
 		const postsWithComments = [];
-
+		console.log('====================================');
+		console.log("posts", posts);
+		console.log('====================================');
 		for (const post of posts) {
-			const totalComments = post.comments.length;
-			const totalLikes = post.likes.length;
+			console.log('====================================');
+			console.log('in posts', post);
+			console.log('====================================');
+			const totalComments = post?.comments.length;
+			const totalLikes = post?.likes.length;
 
 			// Calculate and add comment timestamps relative to the current time
 			const commentsWithTimestamps = post?.comments.map(comment => {
