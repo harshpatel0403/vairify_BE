@@ -47,10 +47,8 @@ export const getAllMarketPost = async (req, res) => {
 		console.log('Current Time:', currentDateTime.format('YYYY-MM-DD HH:mm:ss'));
 
 		posts = posts.filter(post => {
-			// const startTime = moment(`${post.date.from} ${post.time.from}`, 'DD/MM/YYYY hh:mm A').local();
-			// const endTime = moment(`${post.date.to} ${post.time.to}`, 'DD/MM/YYYY hh:mm A').local();
-			const startTime = moment(`${post.date.from} ${post.time.from}`, 'YYYY-MM-DD HH:mm:ss');
-			const endTime = moment(`${post.date.to} ${post.time.to}`, 'YYYY-MM-DD HH:mm:ss');
+			const startTime = moment(`${post.date.from} ${post.time.from}`, 'DD/MM/YYYY hh:mm A').local();
+			const endTime = moment(`${post.date.to} ${post.time.to}`, 'DD/MM/YYYY hh:mm A').local();
 
 			console.log('Start Time:', startTime.format('YYYY-MM-DD HH:mm:ss'));
 			console.log('End Time:', endTime.format('YYYY-MM-DD HH:mm:ss'));
