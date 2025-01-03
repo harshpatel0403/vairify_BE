@@ -43,22 +43,39 @@ export const getAllMarketPost = async (req, res) => {
 
 		// posts = posts.filter(post => moment().isBetween(moment(post.time.from, 'hh:mm A'), moment(post.time.to, 'hh:mm A')))
 
+		// let currentDateTime = moment.utc(); // Use UTC explicitly
+		// console.log('Current Time (UTC):', currentDateTime.format('YYYY-MM-DD HH:mm:ss'));
+
+		// posts = posts.filter(post => {
+		// 	const startTime = moment.utc(`${post.date.from} ${post.time.from}`, 'DD/MM/YYYY hh:mm A');
+		// 	const endTime = moment.utc(`${post.date.to} ${post.time.to}`, 'DD/MM/YYYY hh:mm A');
+
+		// 	console.log('Start Time (UTC):', startTime.format('YYYY-MM-DD HH:mm:ss'));
+		// 	console.log('End Time (UTC):', endTime.format('YYYY-MM-DD HH:mm:ss'));
+
+		// 	const isWithinRange = currentDateTime.isBetween(startTime, endTime, null, '[]');
+		// 	console.log('Is Within Range:', isWithinRange);
+
+		// 	return isWithinRange;
+		// });
+
 		// Get the current time in UTC
-		let currentDateTime = moment.utc(); // Use UTC explicitly
-		console.log('Current Time (UTC):', currentDateTime.format('YYYY-MM-DD HH:mm:ss'));
+		const currentDateTime = new Date(); // This is already in UTC when using the server's UTC clock
+		console.log('Current Time (UTC):', currentDateTime.toISOString());
 
 		posts = posts.filter(post => {
-			const startTime = moment.utc(`${post.date.from} ${post.time.from}`, 'DD/MM/YYYY hh:mm A');
-			const endTime = moment.utc(`${post.date.to} ${post.time.to}`, 'DD/MM/YYYY hh:mm A');
+			const startTime = new Date(`${post.date.from}T${post.time.from}:00Z`);
+			const endTime = new Date(`${post.date.to}T${post.time.to}:00Z`);
 
-			console.log('Start Time (UTC):', startTime.format('YYYY-MM-DD HH:mm:ss'));
-			console.log('End Time (UTC):', endTime.format('YYYY-MM-DD HH:mm:ss'));
+			console.log('Start Time (UTC):', startTime.toISOString());
+			console.log('End Time (UTC):', endTime.toISOString());
 
-			const isWithinRange = currentDateTime.isBetween(startTime, endTime, null, '[]');
+			const isWithinRange = currentDateTime >= startTime && currentDateTime <= endTime;
 			console.log('Is Within Range:', isWithinRange);
 
 			return isWithinRange;
 		});
+
 
 
 
