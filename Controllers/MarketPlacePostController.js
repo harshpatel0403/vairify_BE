@@ -109,7 +109,7 @@ export const getAllMarketPost = async (req, res) => {
 				serviceData: uniqueServiceTypes,
 			};
 			console.log('====================================');
-			console.log(postsWithComments, ' <=== postsWithComments');
+			console.log(postWithComments, ' <=== postsWithComments');
 			console.log('====================================');
 			postsWithComments.push(postWithComments);
 		}
