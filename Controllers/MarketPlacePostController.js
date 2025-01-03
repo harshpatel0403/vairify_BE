@@ -41,51 +41,7 @@ export const getAllMarketPost = async (req, res) => {
 		otherPosts = JSON.parse(JSON.stringify(otherPosts))
 		var posts = [...featuredPosts, ...otherPosts]
 
-		// const currentDateTime = moment().local();  // Current time in local timezone
-		// console.log('Current Time:', currentDateTime.format('YYYY-MM-DD HH:mm:ss Z'));  // Display current time in 'YYYY-MM-DD HH:mm:ss'
-
-		// posts = posts?.filter(post => {
-		// 	// Combine date and time into one string and parse them into moments with the same format
-		// 	const startTime = moment(`${post.date.from} ${post.time.from}`, 'DD/MM/YYYY HH:mm:ss').local();
-		// 	const endTime = moment(`${post.date.to} ${post.time.to}`, 'DD/MM/YYYY HH:mm:ss').local();
-
-		// 	console.log('Start Time:', startTime.format('YYYY-MM-DD HH:mm:ss'));
-		// 	console.log('End Time:', endTime.format('YYYY-MM-DD HH:mm:ss'));
-
-		// 	// Check if current time is between start and end time
-		// 	console.log('Is Between:', currentDateTime.isBetween(startTime, endTime, null, '[]'));  // Use '[]' to include boundaries
-
-		// 	return currentDateTime.isBetween(startTime, endTime, null, '[]');
-		// });
-
-		// console.log('====================================');
-		// console.log("after time posts", posts);
-		// console.log('====================================');
-
-		// Get current time using Date object
-		const currentDateTime = new Date();  // Current date and time
-		console.log('Current Time:', currentDateTime.toISOString());  // Display in ISO format
-
-		posts = posts?.filter(post => {
-			// Parse start and end times as Date objects
-			const startDateTime = new Date(`${post.date.from} ${post.time.from}`);
-			const endDateTime = new Date(`${post.date.to} ${post.time.to}`);
-
-			console.log('Start Time:', startDateTime.toISOString());
-			console.log('End Time:', endDateTime.toISOString());
-			console.log('Current Time:', currentDateTime.toISOString());
-
-			// Check if the current time is between start and end time
-			const isBetween = currentDateTime >= startDateTime && currentDateTime <= endDateTime;
-			console.log('Is Between:', isBetween);
-
-			return isBetween;
-		});
-
-		console.log('====================================');
-		console.log("After filtering posts:", posts);
-		console.log('====================================');
-
+		posts = posts.filter(post => moment().isBetween(moment(post.time.from, 'hh:mm A'), moment(post.time.to, 'hh:mm A')))
 
 		// Calculate totalComments and totalLikes for each post
 		const postsWithComments = [];
