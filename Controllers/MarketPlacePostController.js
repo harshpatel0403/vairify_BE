@@ -46,8 +46,8 @@ export const getAllMarketPost = async (req, res) => {
 
 		posts = posts?.filter(post => {
 			// Combine date and time into one string and parse them into moments with the same format
-			const startTime = moment(`${post.date.from} ${post.time.from}`, 'DD/MM/YYYY hh:mm A').local();
-			const endTime = moment(`${post.date.to} ${post.time.to}`, 'DD/MM/YYYY hh:mm A').local();
+			const startTime = moment(`${post.date.from} ${post.time.from}`, 'DD/MM/YYYY HH:mm:ss').local();
+			const endTime = moment(`${post.date.to} ${post.time.to}`, 'DD/MM/YYYY HH:mm:ss').local();
 
 			console.log('Start Time:', startTime.format('YYYY-MM-DD HH:mm:ss'));
 			console.log('End Time:', endTime.format('YYYY-MM-DD HH:mm:ss'));
