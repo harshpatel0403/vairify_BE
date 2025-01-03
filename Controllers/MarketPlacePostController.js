@@ -12,6 +12,9 @@ import fs from 'fs';
 
 export const getAllMarketPost = async (req, res) => {
 	try {
+		console.log('====================================');
+		console.log('aaa');
+		console.log('====================================');
 		let currentDate = moment().format('DD/MM/YYYY')
 		var featuredPosts = await MarketPlacePost.find({
 			"date.from": { $lte: currentDate },
