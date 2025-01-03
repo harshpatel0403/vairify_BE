@@ -43,7 +43,11 @@ export const getAllMarketPost = async (req, res) => {
 
 		// posts = posts.filter(post => moment().isBetween(moment(post.time.from, 'hh:mm A'), moment(post.time.to, 'hh:mm A')))
 
-		const currentDateTime = moment();
+		const currentDateTime = moment('24:00:00', 'HH:mm:ss')
+			.subtract(moment().format("HH"), 'hours')
+			.subtract(moment().format("mm"), 'minutes')
+			.subtract(moment().format("ss"), 'seconds')
+			;
 		console.log('Current Time:', currentDateTime.format('YYYY-MM-DD HH:mm:ss'));
 
 		posts = posts.filter(post => {
