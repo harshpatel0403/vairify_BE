@@ -59,15 +59,15 @@ export const getAllMarketPost = async (req, res) => {
 				// Customize the time format based on the time difference
 				if (diffMinutes < 60) {
 					return {
-						// ...comment.toObject(),
-						...comment,
+						...comment.toObject(),
+						// ...comment,
 						timeAgo: `${diffMinutes}m`,
 					};
 				} else if (diffMinutes < 1440) {
 					const diffHours = Math.floor(diffMinutes / 60);
 					return {
-						// ...comment.toObject(),
-						...comment,
+						...comment.toObject(),
+						// ...comment,
 						timeAgo: `${diffHours}h`,
 					};
 				} else if (
@@ -77,14 +77,14 @@ export const getAllMarketPost = async (req, res) => {
 					)
 				) {
 					return {
-						// ...comment.toObject(),
-						...comment,
+						...comment.toObject(),
+						// ...comment,
 						timeAgo: "yesterday",
 					};
 				} else {
 					return {
-						// ...comment.toObject(),
-						...comment,
+						...comment.toObject(),
+						// ...comment,
 						timeAgo: createdAtMoment.format("MMM D"),
 					};
 				}
