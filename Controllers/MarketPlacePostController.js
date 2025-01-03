@@ -43,8 +43,8 @@ export const getAllMarketPost = async (req, res) => {
 
 		// posts = posts.filter(post => moment().isBetween(moment(post.time.from, 'hh:mm A'), moment(post.time.to, 'hh:mm A')))
 
-		const currentDateTime = moment('DD/MM/YYYY HH:mm:ss');
-		console.log('Current Time:', currentDateTime.format('YYYY-MM-DD HH:mm:ss'));
+		const currentDateTime = moment().format('DD/MM/YYYY HH:mm:ss');
+		console.log('Current Time:', currentDateTime);
 
 		posts = posts.filter(post => {
 			const startTime = moment(`${post.date.from} ${post.time.from}`, 'DD/MM/YYYY HH:mm:ss').local();
@@ -53,6 +53,7 @@ export const getAllMarketPost = async (req, res) => {
 			console.log('Start Time:', startTime.format('YYYY-MM-DD HH:mm:ss'));
 			console.log('End Time:', endTime.format('YYYY-MM-DD HH:mm:ss'));
 
+			const currentMoment = moment(currentDateTime, 'DD/MM/YYYY HH:mm:ss');
 			return currentDateTime.isBetween(startTime, endTime, null, '[]');
 		});
 
