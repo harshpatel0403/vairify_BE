@@ -40,10 +40,23 @@ export const getAllMarketPost = async (req, res) => {
 		featuredPosts = JSON.parse(JSON.stringify(featuredPosts))
 		otherPosts = JSON.parse(JSON.stringify(otherPosts))
 		var posts = [...featuredPosts, ...otherPosts]
-		console.log('====================================');
-		console.log(moment(posts[0].time.from, 'hh:mm A'), moment(posts[0].time.to, 'hh:mm A'), moment().isBetween(moment(posts[0].time.from, 'hh:mm A'), moment(posts[0].time.to, 'hh:mm A')));
-		console.log('====================================');
-		posts = posts.filter(post => moment().isBetween(moment(post.time.from, 'hh:mm A'), moment(post.time.to, 'hh:mm A')))
+
+		// posts = posts.filter(post => moment().isBetween(moment(post.time.from, 'hh:mm A'), moment(post.time.to, 'hh:mm A')))
+
+		const currentDateTime = moment(); // Get the current date and time in local time
+		console.log('Current Time:', currentDateTime.format('YYYY-MM-DD HH:mm:ss'));
+
+		posts = posts.filter(post => {
+			// Assuming the post times are in 'hh:mm A' format (12-hour format)
+			const startTime = moment(`${post.date.from} ${post.time.from}`, 'DD/MM/YYYY hh:mm A').local();
+			const endTime = moment(`${post.date.to} ${post.time.to}`, 'DD/MM/YYYY hh:mm A').local();
+
+			console.log('Start Time:', startTime.format('YYYY-MM-DD HH:mm:ss'));
+			console.log('End Time:', endTime.format('YYYY-MM-DD HH:mm:ss'));
+
+			// Now compare the current time with the start and end times
+			return currentDateTime.isBetween(startTime, endTime, null, '[]'); // Check if the current time is between the start and end times
+		});
 
 		// Calculate totalComments and totalLikes for each post
 		const postsWithComments = [];
