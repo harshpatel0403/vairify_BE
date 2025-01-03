@@ -60,26 +60,21 @@ export const getAllMarketPost = async (req, res) => {
 		// });
 
 		// Get the current UTC time
-		const currentDateTime = new Date(); // Current UTC time
-		console.log('Current Time (UTC):', currentDateTime.toISOString());  // ISO 8601 format
+		const currentDateTime = moment().utc();
+		console.log('Current Time (UTC):', currentDateTime.format('YYYY-MM-DD HH:mm:ss'));  // Formatted UTC time
 
 		posts = posts.filter(post => {
 			try {
-				// Combine date and time for start and end time with formatting
-				const startTimeStr = `${post.date.from}T${post.time.from}:00Z`; // e.g., 2025-01-03T15:00:00Z
-				const endTimeStr = `${post.date.to}T${post.time.to}:00Z`; // e.g., 2025-01-03T17:00:00Z
-
-				// Create Date objects
-				const startTime = new Date(startTimeStr);
-				const endTime = new Date(endTimeStr);
+				// Use moment to parse the date and time strings, then convert them to UTC
+				const startTime = moment(`${post.date.from} ${post.time.from}`, 'DD/MM/YYYY hh:mm A').utc();
+				const endTime = moment(`${post.date.to} ${post.time.to}`, 'DD/MM/YYYY hh:mm A').utc();
 
 				// Log for debugging purposes
-				console.log('Raw Input:', { startTimeStr, endTimeStr });
-				console.log('Start Time (UTC):', startTime.toISOString());
-				console.log('End Time (UTC):', endTime.toISOString());
+				console.log('Start Time (UTC):', startTime.format('YYYY-MM-DD HH:mm:ss'));
+				console.log('End Time (UTC):', endTime.format('YYYY-MM-DD HH:mm:ss'));
 
-				// Compare current time with start and end time
-				const isWithinRange = currentDateTime >= startTime && currentDateTime <= endTime;
+				// Compare the current time with start and end times
+				const isWithinRange = currentDateTime.isBetween(startTime, endTime, null, '[]');
 				console.log('Is Within Range:', isWithinRange);
 
 				return isWithinRange;
@@ -88,9 +83,6 @@ export const getAllMarketPost = async (req, res) => {
 				return false;  // Skip invalid posts
 			}
 		});
-
-
-
 
 
 		// Calculate totalComments and totalLikes for each post
