@@ -44,8 +44,8 @@ export const getAllMarketPost = async (req, res) => {
 		const currentDateTime = moment().local();
 
 		posts = posts?.filter(post => {
-			const startTime = moment(`${post.date.from} ${post.time.from}`, 'MM/DD/YYYY hh:mm A');
-			const endTime = moment(`${post.date.to} ${post.time.to}`, 'MM/DD/YYYY hh:mm A');
+			const startTime = moment(`${post.date.from} ${post.time.from}`, 'DD/MM/YYYY hh:mm A');
+			const endTime = moment(`${post.date.to} ${post.time.to}`, 'DD/MM/YYYY hh:mm A');
 
 			console.log('Start Time:', startTime.format());
 			console.log('End Time:', endTime.format());
@@ -57,7 +57,7 @@ export const getAllMarketPost = async (req, res) => {
 
 		// posts = posts?.filter(post => moment().isBetween(moment(post.time.from, 'hh:mm A'), moment(post.time.to, 'hh:mm A')))
 		console.log('====================================');
-		console.log("after time moment posts", posts);
+		console.log("after time posts", posts);
 		console.log('====================================');
 		// Calculate totalComments and totalLikes for each post
 		const postsWithComments = [];
