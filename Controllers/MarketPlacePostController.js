@@ -54,7 +54,7 @@ export const getAllMarketPost = async (req, res) => {
 			console.log('End Time:', endTime.format('YYYY-MM-DD HH:mm:ss'));
 
 			const currentMoment = moment(currentDateTime, 'DD/MM/YYYY HH:mm:ss');
-			return currentDateTime.isBetween(startTime, endTime, null, '[]');
+			return currentMoment.isBetween(startTime, endTime, null, '[]');
 		});
 
 		// Calculate totalComments and totalLikes for each post
