@@ -644,7 +644,7 @@ const loginUser = async (req, res) => {
 	try {
 
 		const { email, password } = req.body;
-		const user = await User.findOne({ email: email });
+		const user = await User.findOne({ email });
 
 		if (user && bcrypt.compareSync(password, user.password)) {
 			const resetCode = Math.floor(
@@ -1367,7 +1367,6 @@ const verifyFace = async (req, res) => {
 		const file = req.files;
 		const folderName = "usersFacesTemp";
 
-		// const [file] = req.files;
 		if (!file) {
 			return res.status(400).send({ error: "Please upload proof" });
 		}
@@ -1382,30 +1381,35 @@ const verifyFace = async (req, res) => {
 				console.log("Error Upload Profile", err);
 			});
 		const user = await User.findOne({ _id: userId });
-		const kyc = await KYCDetails.findOne({ userId });
+		// const kyc = await KYCDetails.findOne({ userId });
 
-		if (!user.profilePic || !kyc || !kyc.livePhotoFile) {
-			return res.status(400).send({ error: "Face did not match" });
-		}
+		// if (!user.profilePic || !kyc || !kyc.livePhotoFile) {
+		// 	return res.status(400).send({ error: "Face did not match" });
+		// }
+		const s3Prefix = "https://sayhelloapp.s3.ap-southeast-2.amazonaws.com"
+		// const userProfilePath = `${userKycProfileDir}${kyc.livePhotoFile}`;
 
-		const userProfilePath = `${userKycProfileDir}${kyc.livePhotoFile}`;
-		const latestPhoto = file.path;
+		const userProfilePath = `${s3Prefix}/${user?.faceVerificationImage}`
+		const latestPhoto = `${s3Prefix}/${image}`;
 
-		const python_response = await executePython("python/start.py", [
+		await executePython("python/start.py", [
 			userProfilePath,
 			latestPhoto,
-		]);
-		if (python_response == "True") {
-			return res.send({ message: "Face verified" });
-		}
-		return res.status(400).send({ error: "Face did not match" });
+		]).then(result => {
+			console.log("Result from Python:", result);
+			if (result.verified == true) {
+				return res.send({ message: "Face verified" });
+			}
+			return res.status(400).send({ error: "Face did not match" });
+		})
+			.catch(err => {
+				console.error("Error:", err);
+			});
+
 	} catch (error) {
 		console.error(error);
 		return res.status(500).json({ error: "An error occurred" });
 	}
-	//  finally {
-	// 	fs.unlink(file.path, () => { });
-	// }
 };
 
 const saveLocation = async (req, res) => {
