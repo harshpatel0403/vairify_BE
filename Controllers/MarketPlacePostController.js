@@ -59,22 +59,36 @@ export const getAllMarketPost = async (req, res) => {
 		// 	return isWithinRange;
 		// });
 
-		// Get the current time in UTC
-		const currentDateTime = new Date(); // This is already in UTC when using the server's UTC clock
-		console.log('Current Time (UTC):', currentDateTime.toISOString());
+		// Get the current UTC time
+		const currentDateTime = new Date(); // Current UTC time
+		console.log('Current Time (UTC):', currentDateTime.toISOString());  // ISO 8601 format
 
 		posts = posts.filter(post => {
-			const startTime = new Date(`${post.date.from}T${post.time.from}:00Z`);
-			const endTime = new Date(`${post.date.to}T${post.time.to}:00Z`);
+			try {
+				// Combine date and time for start and end time with formatting
+				const startTimeStr = `${post.date.from}T${post.time.from}:00Z`; // e.g., 2025-01-03T15:00:00Z
+				const endTimeStr = `${post.date.to}T${post.time.to}:00Z`; // e.g., 2025-01-03T17:00:00Z
 
-			console.log('Start Time (UTC):', startTime.toISOString());
-			console.log('End Time (UTC):', endTime.toISOString());
+				// Create Date objects
+				const startTime = new Date(startTimeStr);
+				const endTime = new Date(endTimeStr);
 
-			const isWithinRange = currentDateTime >= startTime && currentDateTime <= endTime;
-			console.log('Is Within Range:', isWithinRange);
+				// Log for debugging purposes
+				console.log('Raw Input:', { startTimeStr, endTimeStr });
+				console.log('Start Time (UTC):', startTime.toISOString());
+				console.log('End Time (UTC):', endTime.toISOString());
 
-			return isWithinRange;
+				// Compare current time with start and end time
+				const isWithinRange = currentDateTime >= startTime && currentDateTime <= endTime;
+				console.log('Is Within Range:', isWithinRange);
+
+				return isWithinRange;
+			} catch (error) {
+				console.error('Error processing post:', post, error.message);
+				return false;  // Skip invalid posts
+			}
 		});
+
 
 
 
