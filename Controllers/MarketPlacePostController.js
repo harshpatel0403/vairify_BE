@@ -43,18 +43,23 @@ export const getAllMarketPost = async (req, res) => {
 
 		// posts = posts.filter(post => moment().isBetween(moment(post.time.from, 'hh:mm A'), moment(post.time.to, 'hh:mm A')))
 
-		let currentDateTime = moment().utc();
-		console.log('Current Time (UTC):', currentDateTime.format());
+		// Get the current time in UTC
+		let currentDateTime = moment.utc(); // Use UTC explicitly
+		console.log('Current Time (UTC):', currentDateTime.format('YYYY-MM-DD HH:mm:ss'));
 
 		posts = posts.filter(post => {
-			const startTime = moment(`${post.date.from} ${post.time.from}`, 'DD/MM/YYYY hh:mm A').local().utc();
-			const endTime = moment(`${post.date.to} ${post.time.to}`, 'DD/MM/YYYY hh:mm A').local().utc();
+			const startTime = moment.utc(`${post.date.from} ${post.time.from}`, 'DD/MM/YYYY hh:mm A');
+			const endTime = moment.utc(`${post.date.to} ${post.time.to}`, 'DD/MM/YYYY hh:mm A');
 
-			console.log('Start Time (UTC):', startTime.format());
-			console.log('End Time (UTC):', endTime.format());
+			console.log('Start Time (UTC):', startTime.format('YYYY-MM-DD HH:mm:ss'));
+			console.log('End Time (UTC):', endTime.format('YYYY-MM-DD HH:mm:ss'));
 
-			return currentDateTime.isBetween(startTime, endTime, null, '[]');
+			const isWithinRange = currentDateTime.isBetween(startTime, endTime, null, '[]');
+			console.log('Is Within Range:', isWithinRange);
+
+			return isWithinRange;
 		});
+
 
 
 		// Calculate totalComments and totalLikes for each post
