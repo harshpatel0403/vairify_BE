@@ -43,46 +43,22 @@ export const getAllMarketPost = async (req, res) => {
 
 		// posts = posts.filter(post => moment().isBetween(moment(post.time.from, 'hh:mm A'), moment(post.time.to, 'hh:mm A')))
 
-		// let currentDateTime = moment.utc(); // Use UTC explicitly
-		// console.log('Current Time (UTC):', currentDateTime.format('YYYY-MM-DD HH:mm:ss'));
-
-		// posts = posts.filter(post => {
-		// 	const startTime = moment.utc(`${post.date.from} ${post.time.from}`, 'DD/MM/YYYY hh:mm A');
-		// 	const endTime = moment.utc(`${post.date.to} ${post.time.to}`, 'DD/MM/YYYY hh:mm A');
-
-		// 	console.log('Start Time (UTC):', startTime.format('YYYY-MM-DD HH:mm:ss'));
-		// 	console.log('End Time (UTC):', endTime.format('YYYY-MM-DD HH:mm:ss'));
-
-		// 	const isWithinRange = currentDateTime.isBetween(startTime, endTime, null, '[]');
-		// 	console.log('Is Within Range:', isWithinRange);
-
-		// 	return isWithinRange;
-		// });
-
-		// Get the current UTC time
-		const currentDateTime = moment().utc();
-		console.log('Current Time (UTC):', currentDateTime.format('YYYY-MM-DD HH:mm:ss'));  // Formatted UTC time
+		let currentDateTime = moment.utc(); // Use UTC explicitly
+		console.log('Current Time (UTC):', currentDateTime.format('YYYY-MM-DD HH:mm:ss'));
 
 		posts = posts.filter(post => {
-			try {
-				// Use moment to parse the date and time strings, then convert them to UTC
-				const startTime = moment(`${post.date.from} ${post.time.from}`, 'DD/MM/YYYY hh:mm A').utc();
-				const endTime = moment(`${post.date.to} ${post.time.to}`, 'DD/MM/YYYY hh:mm A').utc();
+			const startTime = moment.utc(`${post.date.from} ${post.time.from}`, 'DD/MM/YYYY hh:mm A');
+			const endTime = moment.utc(`${post.date.to} ${post.time.to}`, 'DD/MM/YYYY hh:mm A');
 
-				// Log for debugging purposes
-				console.log('Start Time (UTC):', startTime.format('YYYY-MM-DD HH:mm:ss'));
-				console.log('End Time (UTC):', endTime.format('YYYY-MM-DD HH:mm:ss'));
+			console.log('Start Time (UTC):', startTime.format('YYYY-MM-DD HH:mm:ss'));
+			console.log('End Time (UTC):', endTime.format('YYYY-MM-DD HH:mm:ss'));
 
-				// Compare the current time with start and end times
-				const isWithinRange = currentDateTime.isBetween(startTime, endTime, null, '[]');
-				console.log('Is Within Range:', isWithinRange);
+			const isWithinRange = currentDateTime.isBetween(startTime, endTime, null, '[]');
+			console.log('Is Within Range:', isWithinRange);
 
-				return isWithinRange;
-			} catch (error) {
-				console.error('Error processing post:', post, error.message);
-				return false;  // Skip invalid posts
-			}
+			return isWithinRange;
 		});
+
 
 
 		// Calculate totalComments and totalLikes for each post
