@@ -1,5 +1,5 @@
 deepface
-matplotli
+matplotlib
 opencv-contrib-python
 opencv-python
 numpy
