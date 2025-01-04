@@ -4,3 +4,6 @@ opencv-contrib-python==4.10.0.84
 opencv-python==4.7.0.72
 numpy==1.23.5
 pandas==2.2.3
+tf_keras==2.18.0
+retina-face==0.0.17
+tensorflow==2.10.0
