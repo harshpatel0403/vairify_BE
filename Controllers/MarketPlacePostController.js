@@ -43,12 +43,14 @@ export const getAllMarketPost = async (req, res) => {
 
 		// posts = posts.filter(post => moment().isBetween(moment(post.time.from, 'hh:mm A'), moment(post.time.to, 'hh:mm A')))
 
-		let currentDateTime = moment.utc(); // Use UTC explicitly
+		const currentDateTime = moment.utc(); // Explicitly use UTC
 		console.log('Current Time (UTC):', currentDateTime.format('YYYY-MM-DD HH:mm:ss'));
 
 		posts = posts.filter(post => {
-			const startTime = moment.utc(`${post.date.from} ${post.time.from}`, 'DD/MM/YYYY hh:mm A');
-			const endTime = moment.utc(`${post.date.to} ${post.time.to}`, 'DD/MM/YYYY hh:mm A');
+			const timeZone = moment.tz.guess();
+
+			const startTime = moment.tz(`${post.date.from} ${post.time.from}`, 'DD/MM/YYYY hh:mm A', timeZone).utc();
+			const endTime = moment.tz(`${post.date.to} ${post.time.to}`, 'DD/MM/YYYY hh:mm A', timeZone).utc();
 
 			console.log('Start Time (UTC):', startTime.format('YYYY-MM-DD HH:mm:ss'));
 			console.log('End Time (UTC):', endTime.format('YYYY-MM-DD HH:mm:ss'));
@@ -61,12 +63,10 @@ export const getAllMarketPost = async (req, res) => {
 
 
 
+
 		// Calculate totalComments and totalLikes for each post
 		const postsWithComments = [];
 		for (const post of posts) {
-			console.log('====================================');
-			console.log('in posts', post);
-			console.log('====================================');
 			const totalComments = post?.comments.length;
 			const totalLikes = post?.likes.length;
 
