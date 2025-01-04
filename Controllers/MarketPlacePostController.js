@@ -2,7 +2,7 @@ import MarketPlacePost from "../Models/MarketPlacePostModal.js";
 import Services from "../Models/ServicesModal.js";
 import profileDetails from "../Models/ProfileModal.js";
 import User from "../Models/UserModal.js";
-import moment from "moment-timezone";
+import moment from "moment";
 import cron from "node-cron";
 import Follower from "../Models/FollowerModal.js";
 import { sendNotification } from "../Config/utils.js";
@@ -12,8 +12,7 @@ import fs from 'fs';
 
 export const getAllMarketPost = async (req, res) => {
 	try {
-		const timeZone = moment.tz.guess();
-		const currentDate = moment.tz(timeZone).format("DD/MM/YYYY");
+		const currentDate = moment().format("DD/MM/YYYY");
 		var featuredPosts = await MarketPlacePost.find({
 			"date.from": { $lte: currentDate },
 			"date.to": { $gte: currentDate },
@@ -44,14 +43,14 @@ export const getAllMarketPost = async (req, res) => {
 
 		// posts = posts.filter(post => moment().isBetween(moment(post.time.from, 'hh:mm A'), moment(post.time.to, 'hh:mm A')))
 
-		const currentDateTime = moment.utc(); // Explicitly use UTC
+		let currentDateTime = moment.utc();
 		console.log('Current Time (UTC):', currentDateTime.format('YYYY-MM-DD HH:mm:ss'));
 
-		posts = posts.filter(post => {
-			const timeZone = 'UTC';
+		const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-			const startTime = moment.tz(`${post.date.from} ${post.time.from}`, 'DD/MM/YYYY hh:mm A', timeZone).utc();
-			const endTime = moment.tz(`${post.date.to} ${post.time.to}`, 'DD/MM/YYYY hh:mm A', timeZone).utc();
+		posts = posts.filter(post => {
+			const startTime = moment.tz(`${post.date.from} ${post.time.from}`, 'DD/MM/YYYY hh:mm A', userTimezone).utc();
+			const endTime = moment.tz(`${post.date.to} ${post.time.to}`, 'DD/MM/YYYY hh:mm A', userTimezone).utc();
 
 			console.log('Start Time (UTC):', startTime.format('YYYY-MM-DD HH:mm:ss'));
 			console.log('End Time (UTC):', endTime.format('YYYY-MM-DD HH:mm:ss'));
