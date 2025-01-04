@@ -48,7 +48,7 @@ export const getAllMarketPost = async (req, res) => {
 		console.log('Current Time (UTC):', currentDateTime.format('YYYY-MM-DD HH:mm:ss'));
 
 		posts = posts.filter(post => {
-			const timeZone = moment.tz.guess() || 'UTC';
+			const timeZone = 'UTC';
 
 			const startTime = moment.tz(`${post.date.from} ${post.time.from}`, 'DD/MM/YYYY hh:mm A', timeZone).utc();
 			const endTime = moment.tz(`${post.date.to} ${post.time.to}`, 'DD/MM/YYYY hh:mm A', timeZone).utc();
