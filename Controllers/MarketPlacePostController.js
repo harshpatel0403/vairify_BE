@@ -2,7 +2,7 @@ import MarketPlacePost from "../Models/MarketPlacePostModal.js";
 import Services from "../Models/ServicesModal.js";
 import profileDetails from "../Models/ProfileModal.js";
 import User from "../Models/UserModal.js";
-import moment from "moment";
+import moment from "moment-timezone";
 import cron from "node-cron";
 import Follower from "../Models/FollowerModal.js";
 import { sendNotification } from "../Config/utils.js";
