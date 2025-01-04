@@ -30,6 +30,7 @@
 		"googleapis": "^129.0.0",
 		"jsonwebtoken": "^9.0.1",
 		"moment": "^2.29.4",
+		"moment-timezone": "^0.5.46",
 		"mongoose": "^7.4.0",
 		"node-cron": "^3.0.2",
 		"nodemailer": "^6.9.4",

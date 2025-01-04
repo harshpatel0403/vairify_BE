@@ -2,7 +2,7 @@ import MarketPlacePost from "../Models/MarketPlacePostModal.js";
 import Services from "../Models/ServicesModal.js";
 import profileDetails from "../Models/ProfileModal.js";
 import User from "../Models/UserModal.js";
-import moment from "moment";
+import moment from "moment-timezone";
 import cron from "node-cron";
 import Follower from "../Models/FollowerModal.js";
 import { sendNotification } from "../Config/utils.js";
@@ -12,7 +12,8 @@ import fs from 'fs';
 
 export const getAllMarketPost = async (req, res) => {
 	try {
-		let currentDate = moment().format('DD/MM/YYYY')
+		const timeZone = moment.tz.guess();
+		const currentDate = moment.tz(timeZone).format("DD/MM/YYYY");
 		var featuredPosts = await MarketPlacePost.find({
 			"date.from": { $lte: currentDate },
 			"date.to": { $gte: currentDate },
@@ -47,7 +48,7 @@ export const getAllMarketPost = async (req, res) => {
 		console.log('Current Time (UTC):', currentDateTime.format('YYYY-MM-DD HH:mm:ss'));
 
 		posts = posts.filter(post => {
-			const timeZone = moment.tz.guess();
+			const timeZone = moment.tz.guess() || 'UTC';
 
 			const startTime = moment.tz(`${post.date.from} ${post.time.from}`, 'DD/MM/YYYY hh:mm A', timeZone).utc();
 			const endTime = moment.tz(`${post.date.to} ${post.time.to}`, 'DD/MM/YYYY hh:mm A', timeZone).utc();
