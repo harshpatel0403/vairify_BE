@@ -1,11 +1,14 @@
+import os
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+
 from deepface import DeepFace
 import cv2
 import matplotlib.pyplot as plt
 import sys
 import json
-import os
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 if len(sys.argv) < 3:
     error_message = json.dumps({"error": "Image paths are missing!"})
