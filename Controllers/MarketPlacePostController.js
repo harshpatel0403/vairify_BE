@@ -49,6 +49,9 @@ export const getAllMarketPost = async (req, res) => {
 		const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 		posts = posts.filter(post => {
+			console.log('====================================');
+			console.log("User Timezone : ", userTimezone);
+			console.log('====================================');
 			const startTime = moment.tz(`${post.date.from} ${post.time.from}`, 'DD/MM/YYYY hh:mm A', userTimezone).utc();
 			const endTime = moment.tz(`${post.date.to} ${post.time.to}`, 'DD/MM/YYYY hh:mm A', userTimezone).utc();
 

@@ -644,7 +644,7 @@ const loginUser = async (req, res) => {
 	try {
 
 		const { email, password } = req.body;
-		const user = await User.findOne({ email });
+		const user = await User.findOne({ email: email });
 
 		if (user && bcrypt.compareSync(password, user.password)) {
 			const resetCode = Math.floor(
