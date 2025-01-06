@@ -7,4 +7,4 @@ pandas
 tf_keras
 retina-face
 tensorflow
-dotenv
+python-dotenv
