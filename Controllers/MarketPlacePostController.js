@@ -43,30 +43,6 @@ export const getAllMarketPost = async (req, res) => {
 
 		posts = posts.filter(post => moment().isBetween(moment(post.time.from, 'hh:mm A'), moment(post.time.to, 'hh:mm A')))
 
-		// let currentDateTime = moment.utc();
-		// console.log('Current Time (UTC):', currentDateTime.format('YYYY-MM-DD HH:mm:ss'));
-
-		// const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-		// posts = posts.filter(post => {
-		// 	console.log('====================================');
-		// 	console.log("User Timezone : ", userTimezone);
-		// 	console.log('====================================');
-		// 	const startTime = moment.tz(`${post.date.from} ${post.time.from}`, 'DD/MM/YYYY hh:mm A', userTimezone).utc();
-		// 	const endTime = moment.tz(`${post.date.to} ${post.time.to}`, 'DD/MM/YYYY hh:mm A', userTimezone).utc();
-
-		// 	console.log('Start Time (UTC):', startTime.format('YYYY-MM-DD HH:mm:ss'));
-		// 	console.log('End Time (UTC):', endTime.format('YYYY-MM-DD HH:mm:ss'));
-
-		// 	const isWithinRange = currentDateTime.isBetween(startTime, endTime, null, '[]');
-		// 	console.log('Is Within Range:', isWithinRange);
-
-		// 	return isWithinRange;
-		// });
-
-
-
-
 		// Calculate totalComments and totalLikes for each post
 		const postsWithComments = [];
 		for (const post of posts) {
@@ -131,9 +107,6 @@ export const getAllMarketPost = async (req, res) => {
 				totalLikes,
 				serviceData: uniqueServiceTypes,
 			};
-			console.log('====================================');
-			console.log(postWithComments, ' <=== postsWithComments');
-			console.log('====================================');
 			postsWithComments.push(postWithComments);
 		}
 
