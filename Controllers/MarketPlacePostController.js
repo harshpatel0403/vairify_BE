@@ -41,28 +41,28 @@ export const getAllMarketPost = async (req, res) => {
 		otherPosts = JSON.parse(JSON.stringify(otherPosts))
 		var posts = [...featuredPosts, ...otherPosts]
 
-		// posts = posts.filter(post => moment().isBetween(moment(post.time.from, 'hh:mm A'), moment(post.time.to, 'hh:mm A')))
+		posts = posts.filter(post => moment().isBetween(moment(post.time.from, 'hh:mm A'), moment(post.time.to, 'hh:mm A')))
 
-		let currentDateTime = moment.utc();
-		console.log('Current Time (UTC):', currentDateTime.format('YYYY-MM-DD HH:mm:ss'));
+		// let currentDateTime = moment.utc();
+		// console.log('Current Time (UTC):', currentDateTime.format('YYYY-MM-DD HH:mm:ss'));
 
-		const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+		// const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-		posts = posts.filter(post => {
-			console.log('====================================');
-			console.log("User Timezone : ", userTimezone);
-			console.log('====================================');
-			const startTime = moment.tz(`${post.date.from} ${post.time.from}`, 'DD/MM/YYYY hh:mm A', userTimezone).utc();
-			const endTime = moment.tz(`${post.date.to} ${post.time.to}`, 'DD/MM/YYYY hh:mm A', userTimezone).utc();
+		// posts = posts.filter(post => {
+		// 	console.log('====================================');
+		// 	console.log("User Timezone : ", userTimezone);
+		// 	console.log('====================================');
+		// 	const startTime = moment.tz(`${post.date.from} ${post.time.from}`, 'DD/MM/YYYY hh:mm A', userTimezone).utc();
+		// 	const endTime = moment.tz(`${post.date.to} ${post.time.to}`, 'DD/MM/YYYY hh:mm A', userTimezone).utc();
 
-			console.log('Start Time (UTC):', startTime.format('YYYY-MM-DD HH:mm:ss'));
-			console.log('End Time (UTC):', endTime.format('YYYY-MM-DD HH:mm:ss'));
+		// 	console.log('Start Time (UTC):', startTime.format('YYYY-MM-DD HH:mm:ss'));
+		// 	console.log('End Time (UTC):', endTime.format('YYYY-MM-DD HH:mm:ss'));
 
-			const isWithinRange = currentDateTime.isBetween(startTime, endTime, null, '[]');
-			console.log('Is Within Range:', isWithinRange);
+		// 	const isWithinRange = currentDateTime.isBetween(startTime, endTime, null, '[]');
+		// 	console.log('Is Within Range:', isWithinRange);
 
-			return isWithinRange;
-		});
+		// 	return isWithinRange;
+		// });
 
 
 
@@ -170,27 +170,15 @@ export const createMarketPost = async (req, res) => {
 		data.image = image;
 		const user = await User.findById(data.userId);
 		const profile = await profileDetails.findOne({ userId: data.userId });
-		const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-		const timeFrom = data['time.from'];
-		const timeTo = data['time.to'];
+		const timeFrom = data['time.from'].split(" ")[1];
+		const timeTo = data['time.to'].split(" ")[1];
 
-		const today = moment().format("YYYY-MM-DD");
+		const formattedTimeFrom = moment(timeFrom, "HH:mm:ss").format("hh:mm A");
+		const formattedTimeTo = moment(timeTo, "HH:mm:ss").format("hh:mm A");
 
-		const fromWithTimezone = moment.tz(`${today} ${timeFrom}`, "YYYY-MM-DD hh:mm A", userTimezone);
-		const toWithTimezone = moment.tz(`${today} ${timeTo}`, "YYYY-MM-DD hh:mm A", userTimezone);
-
-		// Convert to UTC
-		const fromUtc = fromWithTimezone.utc().format("YYYY-MM-DD HH:mm:ss");
-		const toUtc = toWithTimezone.utc().format("YYYY-MM-DD HH:mm:ss");
-
-		console.log('====================================');
-		console.log(`Original Time From: ${timeFrom} | UTC: ${fromUtc}`);
-		console.log(`Original Time To: ${timeTo} | UTC: ${toUtc}`);
-		console.log('====================================');
-
-		data['time.from'] = fromUtc;
-		data['time.to'] = toUtc;
+		data['time.from'] = formattedTimeFrom;
+		data['time.to'] = formattedTimeTo;
 		if (!user) {
 			return res.status(404).json({ message: "User not found." });
 		}
