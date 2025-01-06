@@ -153,19 +153,19 @@ export const createMarketPost = async (req, res) => {
 		const data = req.fields;
 		const file = req.files;
 		var image = "";
-		// if (file) {
-		// 	const folderName = "marketplacePost";
-		// 	await uploadToS3(folderName, file.buffer, file.filename.filename, file.filename.mimetype)
-		// 		.then(url => {
-		// 			console.log('File uploaded successfully in Marketplace post:', url);
-		// 			image = url;
-		// 		})
-		// 		.catch(err => console.error('Error uploading file in Marketplace post:', err));
-		// }
+		if (file) {
+			const folderName = "marketplacePost";
+			await uploadToS3(folderName, file.buffer, file.filename.filename, file.filename.mimetype)
+				.then(url => {
+					console.log('File uploaded successfully in Marketplace post:', url);
+					image = url;
+				})
+				.catch(err => console.error('Error uploading file in Marketplace post:', err));
+		}
 
-		// if (data?.image) {
-		// 	image = data?.image;
-		// }
+		if (data?.image) {
+			image = data?.image;
+		}
 
 		data.image = image;
 		const user = await User.findById(data.userId);
@@ -194,8 +194,8 @@ export const createMarketPost = async (req, res) => {
 			return res.status(400).json({ message: "Tokens not found." });
 		}
 		// user.tokens = parseFloat(user.tokens) - parseFloat(data.tokens);
-		// user.tokens = parseFloat(user.tokens) - parseFloat(data.totalGRT);
-		// await user.save();
+		user.tokens = parseFloat(user.tokens) - parseFloat(data.totalGRT);
+		await user.save();
 
 		data.tokensavailable = "Yes";
 		data.currentpost = 1;
@@ -211,31 +211,31 @@ export const createMarketPost = async (req, res) => {
 				? []
 				: data.comments;
 
-		// const MarketPost = new MarketPlacePost(data);
+		const MarketPost = new MarketPlacePost(data);
 
 		// Save the document to the database
-		// await MarketPost.save();
+		await MarketPost.save();
 
 		// send notification to all followers with verified rule
-		// const followers = await Follower.find({ userId: data.userId }).populate(
-		// 	"follower_id",
-		// );
+		const followers = await Follower.find({ userId: data.userId }).populate(
+			"follower_id",
+		);
 
-		// for (let follower of followers) {
-		// 	if (follower?.isNotifyWhenPost === true) {
-		// 		sendNotification(
-		// 			data.userId,
-		// 			follower?.follower_id?._id?.toString(),
-		// 			"MARKETPLACE_FEED_POST",
-		// 			`${follower?.follower_id?.name} Just posted!`,
-		// 			`${follower?.follower_id?.name} has just posted in marketplace`,
-		// 		);
-		// 	}
-		// }
+		for (let follower of followers) {
+			if (follower?.isNotifyWhenPost === true) {
+				sendNotification(
+					data.userId,
+					follower?.follower_id?._id?.toString(),
+					"MARKETPLACE_FEED_POST",
+					`${follower?.follower_id?.name} Just posted!`,
+					`${follower?.follower_id?.name} has just posted in marketplace`,
+				);
+			}
+		}
 
 		res.status(200).json({
 			message: "Post created successfully",
-			// MarketPost,
+			MarketPost,
 		});
 
 
