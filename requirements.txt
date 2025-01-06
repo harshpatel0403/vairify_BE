@@ -8,3 +8,4 @@ tf_keras
 retina-face
 tensorflow
 python-dotenv
+tensorflow-cpu
