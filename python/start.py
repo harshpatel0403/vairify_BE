@@ -7,7 +7,7 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = os.getenv('TF_CPP_MIN_LOG_LEVEL', '2')
-os.environ["CUDA_VISIBLE_DEVICES"] = os.getenv('CUDA_VISIBLE_DEVICES', '-1')
+# os.environ["CUDA_VISIBLE_DEVICES"] = os.getenv('CUDA_VISIBLE_DEVICES', '-1')
 
 if len(sys.argv) < 3:
     error_message = json.dumps({"error": "Image paths are missing!"})
