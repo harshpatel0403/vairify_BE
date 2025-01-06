@@ -1395,14 +1395,8 @@ const verifyFace = async (req, res) => {
 		// if (!user.profilePic || !kyc || !kyc.livePhotoFile) {
 		// 	return res.status(400).send({ error: "Face did not match" });
 		// }
-		const s3Prefix = "https://sayhelloapp.s3.ap-southeast-2.amazonaws.com"
-		// const userProfilePath = `${userKycProfileDir}${kyc.livePhotoFile}`;
 
-		// const userProfilePath = `${s3Prefix}/${user?.faceVerificationImage}`
-		// const latestPhoto = `${s3Prefix}/${image}`;
-		console.log('====================================');
-		console.log(image, user?.faceVerificationImage);
-		console.log('====================================');
+
 		await compareFaces(image, user?.faceVerificationImage)
 			.then(result => {
 				if (result.matches.length > 0) {
@@ -1417,19 +1411,6 @@ const verifyFace = async (req, res) => {
 				console.error("Error in verifyFace compareFace call: ", error)
 				return res.status(500).json({ error: "Please capture your face in camera." });
 			});
-		// await executePython("python/start.py", [
-		// 	userProfilePath,
-		// 	latestPhoto,
-		// ]).then(result => {
-		// 	console.log("Result from Python:", result);
-		// 	if (result.verified == true) {
-		// 		return res.send({ message: "Face verified" });
-		// 	}
-		// 	return res.status(400).send({ error: "Face did not match" });
-		// })
-		// 	.catch(err => {
-		// 		console.error("Error:", err);
-		// 	});
 
 	} catch (error) {
 		console.error("Error in verifyFace : ", error);
