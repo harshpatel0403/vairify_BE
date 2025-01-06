@@ -23,10 +23,8 @@ export const saveAppointment = async (req, res) => {
 
         const user = await User.findById(clientId)
 
-        // const [file] = req.files || []
-
         let image;
-        if (file) {
+        if (file.length > 0) {
             await uploadToS3(folderName, file.buffer, file.filename.filename, file.filename.mimeType)
                 .then((res) => {
                     image = res;
