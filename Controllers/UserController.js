@@ -21,7 +21,7 @@ import Follower from "../Models/FollowerModal.js";
 import Favourite from "../Models/FavouriteModal.js";
 import mongoose from "mongoose";
 import KYCDetails from "../Models/KYCDetailModal.js";
-import { uploadToS3 } from "../utils/awsS3Functions.js";
+import { compareFaces, uploadToS3 } from "../utils/awsS3Functions.js";
 
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
@@ -682,24 +682,24 @@ const loginUser = async (req, res) => {
 				},
 			}
 
-			const poller = await emailClient.beginSend(emailMessage);
-			const response = await poller.pollUntilDone();
+			// const poller = await emailClient.beginSend(emailMessage);
+			// const response = await poller.pollUntilDone();
 
-			if (response?.status === 'Succeeded') {
-				return res.json({
-					message: "Email has been sent",
-				});
-			}
-			else {
-				return res.json({
-					message: "Email can not be sent",
-					err,
-				});
-			}
+			// if (response?.status === 'Succeeded') {
+			// 	return res.json({
+			// 		message: "Email has been sent",
+			// 	});
+			// }
+			// else {
+			// 	return res.json({
+			// 		message: "Email can not be sent",
+			// 		err,
+			// 	});
+			// }
 
-			// return res.json({
-			// 	message: "message sent",
-			// });
+			return res.json({
+				message: "message sent",
+			});
 
 		}
 		else {
@@ -1380,6 +1380,7 @@ const verifyFace = async (req, res) => {
 			.catch((err) => {
 				console.log("Error Upload Profile", err);
 			});
+
 		const user = await User.findOne({ _id: userId });
 		// const kyc = await KYCDetails.findOne({ userId });
 
@@ -1389,25 +1390,39 @@ const verifyFace = async (req, res) => {
 		const s3Prefix = "https://sayhelloapp.s3.ap-southeast-2.amazonaws.com"
 		// const userProfilePath = `${userKycProfileDir}${kyc.livePhotoFile}`;
 
-		const userProfilePath = `${s3Prefix}/${user?.faceVerificationImage}`
-		const latestPhoto = `${s3Prefix}/${image}`;
+		// const userProfilePath = `${s3Prefix}/${user?.faceVerificationImage}`
+		// const latestPhoto = `${s3Prefix}/${image}`;
 
-		await executePython("python/start.py", [
-			userProfilePath,
-			latestPhoto,
-		]).then(result => {
-			console.log("Result from Python:", result);
-			if (result.verified == true) {
-				return res.send({ message: "Face verified" });
-			}
-			return res.status(400).send({ error: "Face did not match" });
-		})
-			.catch(err => {
-				console.error("Error:", err);
+		await compareFaces(image, user?.faceVerificationImage)
+			.then(result => {
+				if (result.matches.length > 0) {
+					console.log('Faces match with similarity:', result.matches[0].similarity);
+					return res.send({ message: "Face verified" });
+				} else {
+					console.log('No matching faces found.');
+					return res.status(400).send({ error: "Face did not match" });
+				}
+			})
+			.catch((error) => {
+				console.error("Error in verifyFace compareFace call: ", error)
+				return res.status(500).json({ error: "Please capture your face in camera." });
 			});
+		// await executePython("python/start.py", [
+		// 	userProfilePath,
+		// 	latestPhoto,
+		// ]).then(result => {
+		// 	console.log("Result from Python:", result);
+		// 	if (result.verified == true) {
+		// 		return res.send({ message: "Face verified" });
+		// 	}
+		// 	return res.status(400).send({ error: "Face did not match" });
+		// })
+		// 	.catch(err => {
+		// 		console.error("Error:", err);
+		// 	});
 
 	} catch (error) {
-		console.error(error);
+		console.error("Error in verifyFace : ", error);
 		return res.status(500).json({ error: "An error occurred" });
 	}
 };

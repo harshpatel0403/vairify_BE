@@ -5,6 +5,11 @@ const s3 = new AWS.S3({
     secretAccessKey: process.env.AWS_SECERT_TOKEN,
 });
 
+const rekognition = new AWS.Rekognition({
+    region: process.env.AWS_REGION,
+    accessKeyId: process.env.AWS_ACCESS_TOKEN,
+    secretAccessKey: process.env.AWS_SECERT_TOKEN,
+})
 export const uploadToS3 = async (folderName, fileBuffer, fileName, mimeType) => {
     const chunkSize = 5 * 1024 * 1024; // 5MB
     try {
@@ -85,6 +90,41 @@ export const deleteFilesFromFolder = async (fileUrl) => {
     }
 };
 
+export const compareFaces = async (sourceImageKey, targetImageKey, similarityThreshold = 80) => {
+    try {
+        const params = {
+            SourceImage: {
+                S3Object: {
+                    Bucket: process.env.AWS_BUCKET,
+                    Name: sourceImageKey,
+                },
+            },
+            TargetImage: {
+                S3Object: {
+                    Bucket: process.env.AWS_BUCKET,
+                    Name: targetImageKey,
+                },
+            },
+            SimilarityThreshold: similarityThreshold,
+        };
+
+        const response = await rekognition.compareFaces(params).promise();
+        console.log('Face comparison result:', response);
+
+        const matchDetails = response.FaceMatches.map(match => ({
+            similarity: match.Similarity,
+            boundingBox: match.Face.BoundingBox,
+        }));
+
+        return {
+            matches: matchDetails,
+            unmatchedFaces: response.UnmatchedFaces,
+        };
+    } catch (error) {
+        console.error('Error comparing faces:', error);
+        throw error;
+    }
+};
 
 export const fetchS3Files = async () => {
     try {
