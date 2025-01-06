@@ -90,6 +90,34 @@ export const deleteFilesFromFolder = async (fileUrl) => {
     }
 };
 
+
+export const detectFace = async (imageKey) => {
+    const params = {
+        Image: {
+            S3Object: {
+                Bucket: process.env.AWS_BUCKET,
+                Name: imageKey,
+            },
+        },
+    };
+
+    try {
+        const data = await rekognition.detectFaces(params).promise();
+
+        if (data.FaceDetails.length > 0) {
+            console.log('Faces detected:', data.FaceDetails);
+            return true;
+        } else {
+            console.log('No faces detected');
+            return false;
+        }
+    } catch (error) {
+        console.error('Error detecting faces:', error);
+        throw error;
+    }
+};
+
+
 export const compareFaces = async (sourceImageKey, targetImageKey, similarityThreshold = 80) => {
     try {
         const params = {

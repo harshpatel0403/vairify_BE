@@ -21,7 +21,7 @@ import Follower from "../Models/FollowerModal.js";
 import Favourite from "../Models/FavouriteModal.js";
 import mongoose from "mongoose";
 import KYCDetails from "../Models/KYCDetailModal.js";
-import { compareFaces, uploadToS3 } from "../utils/awsS3Functions.js";
+import { compareFaces, detectFace, uploadToS3 } from "../utils/awsS3Functions.js";
 
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
@@ -682,24 +682,24 @@ const loginUser = async (req, res) => {
 				},
 			}
 
-			// const poller = await emailClient.beginSend(emailMessage);
-			// const response = await poller.pollUntilDone();
+			const poller = await emailClient.beginSend(emailMessage);
+			const response = await poller.pollUntilDone();
 
-			// if (response?.status === 'Succeeded') {
-			// 	return res.json({
-			// 		message: "Email has been sent",
-			// 	});
-			// }
-			// else {
-			// 	return res.json({
-			// 		message: "Email can not be sent",
-			// 		err,
-			// 	});
-			// }
+			if (response?.status === 'Succeeded') {
+				return res.json({
+					message: "Email has been sent",
+				});
+			}
+			else {
+				return res.json({
+					message: "Email can not be sent",
+					err,
+				});
+			}
 
-			return res.json({
-				message: "message sent",
-			});
+			// return res.json({
+			// 	message: "message sent",
+			// });
 
 		}
 		else {
@@ -1315,6 +1315,14 @@ const uploadFaceVerificationImage = async (req, res) => {
 				})
 				.catch(err => console.error('Error uploading file in Marketplace post:', err));
 		}
+		const faceDetected = await detectFace(image);
+		if (!faceDetected) {
+			console.log('No faces detected in the image.');
+			return res.status(400).json({
+				message: "No faces detected in the image.",
+			});
+		}
+
 
 		console.log(image, "uploadFaceVerificationImage  profie")
 
@@ -1392,7 +1400,9 @@ const verifyFace = async (req, res) => {
 
 		// const userProfilePath = `${s3Prefix}/${user?.faceVerificationImage}`
 		// const latestPhoto = `${s3Prefix}/${image}`;
-
+		console.log('====================================');
+		console.log(image, user?.faceVerificationImage);
+		console.log('====================================');
 		await compareFaces(image, user?.faceVerificationImage)
 			.then(result => {
 				if (result.matches.length > 0) {
