@@ -55,34 +55,6 @@ import { Server } from "socket.io";
 import { spawn } from "child_process";
 import webpush from "web-push";
 
-export const executePython = async (script, args) => {
-	const largs = args.map(arg => arg.toString());
-
-	const py = spawn("python", [script, ...largs]);
-
-	const result = await new Promise((resolve, reject) => {
-		let output;
-
-		// Get output from python script
-		py.stdout.on("data", data => {
-			output = data.toString().trim();
-		});
-
-		// Handle erros
-		py.stderr.on("data", data => {
-			console.error(`[python] Error occured: ${data}`);
-			reject(`Error occured in ${script}`);
-		});
-
-		py.on("exit", code => {
-			console.log(`Child process exited with code ${code}`);
-			resolve(output);
-		});
-	});
-
-	return result;
-};
-
 dotenv.config();
 connectDB();
 const app = express();

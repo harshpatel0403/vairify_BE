@@ -13,7 +13,6 @@ import twilio from "twilio";
 import nodemailer from "nodemailer";
 import moment from "moment";
 import { userKycProfileDir, userProfileDir } from "../Routes/UserRoutes.js";
-import { executePython } from "../index.js";
 import profileDetails from "../Models/ProfileModal.js";
 import calendarSchedule from "../Models/CalendarSchedulesModal.js";
 import CalendarSetting from "../Models/CalendarSettingModal.js";
