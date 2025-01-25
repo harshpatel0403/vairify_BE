@@ -45,9 +45,10 @@ export const getAllMarketPost = async (req, res) => {
 
 		// Calculate totalComments and totalLikes for each post
 		const postsWithComments = [];
+
 		for (const post of posts) {
-			const totalComments = post?.comments.length;
-			const totalLikes = post?.likes.length;
+			const totalComments = post.comments.length;
+			const totalLikes = post.likes.length;
 
 			// Calculate and add comment timestamps relative to the current time
 			const commentsWithTimestamps = post?.comments.map(comment => {
@@ -107,9 +108,9 @@ export const getAllMarketPost = async (req, res) => {
 				totalLikes,
 				serviceData: uniqueServiceTypes,
 			};
+
 			postsWithComments.push(postWithComments);
 		}
-
 
 		res.status(200).json(postsWithComments);
 	} catch (error) {
@@ -126,6 +127,7 @@ export const createMarketPost = async (req, res) => {
 		const data = req.fields;
 		const file = req.files;
 		var image = "";
+
 		if (file) {
 			const folderName = "marketplacePost";
 			await uploadToS3(folderName, file.buffer, file.filename.filename, file.filename.mimetype)

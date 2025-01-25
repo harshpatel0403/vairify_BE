@@ -1387,14 +1387,12 @@ const verifyFace = async (req, res) => {
 			.catch((err) => {
 				console.log("Error Upload Profile", err);
 			});
-
 		const user = await User.findOne({ _id: userId });
 		// const kyc = await KYCDetails.findOne({ userId });
 
 		// if (!user.profilePic || !kyc || !kyc.livePhotoFile) {
 		// 	return res.status(400).send({ error: "Face did not match" });
 		// }
-
 
 		await compareFaces(image, user?.faceVerificationImage)
 			.then(result => {

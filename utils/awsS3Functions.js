@@ -1,4 +1,7 @@
 import AWS from 'aws-sdk';
+import fs from 'fs';
+import { readFile, stat } from 'fs/promises';
+import { Readable } from 'stream';
 const s3 = new AWS.S3({
     region: process.env.AWS_REGION,
     accessKeyId: process.env.AWS_ACCESS_TOKEN,
@@ -14,6 +17,7 @@ export const uploadToS3 = async (folderName, fileBuffer, fileName, mimeType) => 
     const chunkSize = 5 * 1024 * 1024; // 5MB
     try {
 
+        // const fileStats = await stat(filePath);
         const fileSize = fileBuffer.length;
         const totalParts = Math.ceil(fileSize / chunkSize);
         const timestamp = new Date().toISOString();
@@ -33,6 +37,7 @@ export const uploadToS3 = async (folderName, fileBuffer, fileName, mimeType) => 
         for (let partNumber = 1; partNumber <= totalParts; partNumber++) {
             const start = (partNumber - 1) * chunkSize;
             const end = Math.min(start + chunkSize, fileSize);
+            // const fileBuffer = await readFile(filePath)
             const partBuffer = fileBuffer.slice(start, end);
 
             const partParams = {
@@ -63,8 +68,15 @@ export const uploadToS3 = async (folderName, fileBuffer, fileName, mimeType) => 
 
         await s3.completeMultipartUpload(completeParams).promise();
 
+        // fs.unlink(filePath,(err)=>{
+        //     if(err){
+        //         console.error(`Error removing file ${filePath}`,err);
+        //     }
+        //     console.log(`File ${filePath} has been successfully removed`)
+        // })
+
         console.log("File uploaded sucessfully to aws s3.");
-        return uniqueKey;
+        return uniqueKey
 
     } catch (error) {
         console.error('Error uploading file in chunks:', error);

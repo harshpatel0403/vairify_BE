@@ -10,13 +10,32 @@ const __dirname = dirname(__filename);
 
 export const AddDoc = async (req, res) => {
 	try {
-		const { clientId, type, classification, userId } = req.body;
+		const {
+			clientId,
+			type,
+			classification,
+			issuingCountry,
+			idNumber,
+			userId,
+		} = req.body;
+		if (!clientId || !type || !classification || !userId) {
+			console.log("Missing required fields:", {
+				clientId,
+				type,
+				classification,
+				userId,
+			});
+			return res.status(400).send("Missing required fields");
+		}
 
 		const requestData = JSON.stringify({
 			clientId: clientId,
 			type: type,
 			classification: classification,
+			issuingCountry: issuingCountry,
+			documentNumber: idNumber,
 		});
+		console.log("Request payload for ComplyCube API:", requestData);
 
 		const config = {
 			method: "post",
@@ -39,21 +58,33 @@ export const AddDoc = async (req, res) => {
 						isDocIdGenerated: true,
 						documentId: response.data.id,
 						type,
+						classification,
+						issuingCountry,
+						idNumber,
 					},
 				);
+				console.log("Updated KYC details in database");
 			} else {
 				const newKYCDetails = new KYCDetails({
 					userId: userId,
 					isDocIdGenerated: true,
 					documentId: response.data.id,
 					type,
+					classification,
+					issuingCountry,
+					idNumber,
 				});
 				await newKYCDetails.save();
+				console.log("Saved new KYC details in database");
 			}
 			res.status(200).json(response.data);
 		} catch (error) {
 			console.error(error);
-			res.status(500).send("Error uploading to ComplyCube");
+			// res.status(500).send("Error uploading to ComplyCube");
+			console.error(
+				"Error uploading to ComplyCube:",
+				error.response?.data || error.message,
+			);
 		}
 	} catch (error) {
 		console.error(error);
@@ -187,30 +218,30 @@ export const LivePhoto = async (req, res) => {
 				const imageDataResponse = await axios(downloadConfig);
 
 				// Decode base64-encoded image data
-				const imageData = Buffer.from(
-					imageDataResponse.data.data,
-					"base64",
-				);
+				// const imageData = Buffer.from(
+				// 	imageDataResponse.data.data,
+				// 	"base64",
+				// );
 
 				// Save the image data to the local file
 				const timestamp = Date.now();
 				const filename = `livePhoto_${timestamp}.jpg`;
-				if (
-					!fs.existsSync(
-						path.join(__dirname, "../", `/public/userKycImages/`),
-					)
-				) {
-					fs.mkdirSync(
-						path.join(__dirname, "../", `/public/userKycImages/`),
-					);
-				}
-				const filePath = path.join(
-					__dirname,
-					"../",
-					`/public/userKycImages/${filename}`,
-				);
+				// if (
+				// 	!fs.existsSync(
+				// 		path.join(__dirname, "../", `/public/userKycImages/`),
+				// 	)
+				// ) {
+				// 	fs.mkdirSync(
+				// 		path.join(__dirname, "../", `/public/userKycImages/`),
+				// 	);
+				// }
+				// const filePath = path.join(
+				// 	__dirname,
+				// 	"../",
+				// 	`/public/userKycImages/${filename}`,
+				// );
 
-				fs.writeFileSync(filePath, imageData);
+				// fs.writeFileSync(filePath, imageData);
 
 				await KYCDetails.updateOne(
 					{ userId },
@@ -262,24 +293,24 @@ export const RunCheck = async (req, res) => {
 			if (kycDetail) {
 				const userDetails = await User.findOne({ _id: userId });
 
-				if (type === "document_check") {
-					await KYCDetails.updateOne(
-						{ userId },
-						{
-							isCheckDone: true,
-							documentCheckId: response.data.id,
-						},
-					);
-				} else {
-					await KYCDetails.updateOne(
-						{ userId },
-						{ isCheckDone: true, checkId: response.data.id },
-					);
-				}
+				// if (type === "document_check") {
+				// 	await KYCDetails.updateOne(
+				// 		{ userId },
+				// 		{
+				// 			isCheckDone: true,
+				// 			documentCheckId: response.data.id,
+				// 		},
+				// 	);
+				// } else {
+				await KYCDetails.updateOne(
+					{ userId },
+					{ isCheckDone: true, checkId: response.data.id },
+				);
+				// }
 
 				console.log(
 					"the defauult user checkout is: ",
-					userDetails.checkCount,
+					userDetails,
 				);
 				await User.updateOne(
 					{ userId },
@@ -313,21 +344,105 @@ export const getCheckResult = async (req, res) => {
 
 		try {
 			const response = await axios(config);
-			// await User.updateOne({ _id: userId }, { isKycCompleted: true });
-			// const kycDetail = await KYCDetails.findOne({ userId });
-			// if (kycDetail) {
-			// 	await KYCDetails.updateOne(
-			// 		{ userId },
-			// 		{
-			// 			isKycCompleted: true,
-			// 			checkResult: JSON.stringify(response.data),
-			// 		},
-			// 	);
-			// }
+			await User.updateOne({ _id: userId }, { isKycCompleted: true });
+			const kycDetail = await KYCDetails.findOne({ userId });
+			if (kycDetail) {
+				await KYCDetails.updateOne(
+					{ userId },
+					{
+						isKycCompleted: true,
+						checkResult: JSON.stringify(response.data),
+					},
+				);
+			}
 			res.status(200).json(response.data);
 		} catch (error) {
 			console.error(error);
 			res.status(500).send("Error uploading to ComplyCube");
+		}
+	} catch (error) {
+		console.error(error);
+		res.status(400).send("Bad request");
+	}
+};
+
+export const validateDocument = async (req, res) => {
+	try {
+		const { documentType, clientId, documentId, idNumber, userId } = req.body;
+
+		if (!documentType || !clientId || !documentId) {
+			return res.status(400).json({
+				error: "Image, clientId, documentId, and document type are required",
+			});
+		}
+
+		const requestData = JSON.stringify({
+			clientId: clientId,
+			documentId: documentId,
+			type: "document_check",
+			documentType: documentType,
+			documentNumber: idNumber,
+		});
+		const validateConfig = {
+			method: "post",
+			maxBodyLength: Infinity,
+			url: `https://api.complycube.com/v1/checks`,
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: process.env.COMPLYCUBE_API_TOKEN,
+			},
+			data: requestData,
+		};
+		try {
+			const validateResponse = await axios(validateConfig);
+
+			const kycDetail = await KYCDetails.findOne({ userId });
+			if (kycDetail) {
+				const userDetails = await User.findOne({ _id: userId });
+				console.log(validateResponse, "kyc and user ")
+
+				await KYCDetails.updateOne(
+					{ userId },
+					{
+						isCheckDone: true,
+						documentCheckId: validateResponse.data.id,
+					}, []
+				);
+			}
+			res.status(200).json(validateResponse.data);
+		} catch (error) {
+			console.error(error);
+			res.status(500).send("Error uploading to ComplyCube");
+		}
+	} catch (error) {
+		console.error(
+			"Error validating document:",
+			error.response?.data || error.message,
+		);
+	}
+};
+
+
+export const DocCheckstatus = async (req, res) => {
+	try {
+		const { documentCheckId } = req.query;
+		if (!documentCheckId) {
+			throw new Error("Invalid response: Missing documentId");
+		}
+		const configGetResult = {
+			method: "get",
+			maxBodyLength: Infinity,
+			url: `https://api.complycube.com/v1/checks/${documentCheckId}`,
+			headers: {
+				Authorization: process.env.COMPLYCUBE_API_TOKEN,
+			},
+		};
+		try {
+			const response = await axios(configGetResult);
+			res.status(200).json(response.data);
+		} catch (error) {
+			console.error(error.response ? error.response.data : error.message);
+			res.status(500).send("Error ComplyCube Front Document Status");
 		}
 	} catch (error) {
 		console.error(error);
