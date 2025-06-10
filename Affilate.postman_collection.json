@@ -1,0 +1,314 @@
+{
+	"info": {
+		"_postman_id": "c9b23064-e6aa-432c-8533-3d09d4f75fe7",
+		"name": "Affilate",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register Simple User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Crustal\",\r\n  \"email\": \"crystal1212@example.com\",\r\n  \"password\": \"member321\",\r\n  \"country\": \"United States\",\r\n  \"user_type\": \"client\",\r\n  \"business_name\": \"\",\r\n  \"business_type\": \"\",\r\n  \"gender\": \"male\",\r\n  \"is_admin\":false,\r\n  \"application_type\": \"pwa\",\r\n  \"affiliate_url\": \"\",\r\n  \"is_affiliate\": false,\r\n  \"user_affiliate_link\":\"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/users/create",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register Affiliate User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Crustal\",\r\n  \"email\": \"crystal12112@example.com\",\r\n  \"password\": \"member321\",\r\n  \"country\": \"United States\",\r\n  \"user_type\": \"client\",\r\n  \"business_name\": \"\",\r\n  \"business_type\": \"\",\r\n  \"gender\": \"male\",\r\n  \"is_admin\":false,\r\n  \"application_type\": \"pwa\",\r\n  \"affiliate_url\": \"\",\r\n  \"is_affiliate\": false,\r\n  \"user_affiliate_link\":\"owQ64DgMa\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/users/create",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"email\":\"crystal1212@example.com\", \"password\": \"member321\"}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/users/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Network",
+			"item": [
+				{
+					"name": "Get Network",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/users/network/64be4117c111afd6d514a3ae",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"network",
+								"64be4117c111afd6d514a3ae"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Banner & Links",
+			"item": [
+				{
+					"name": "Create Banners",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"bannerImage\": \"https://www.w3schools.com/html/pic_trulli.jpg\",\r\n  \"bannerName\": \"Banner Test\",\r\n  \"bannerLink\": \"https://www.w3schools.com\",\r\n  \"creatorUserId\": \"64be4117c111afd6d514a3ae\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/banner/create",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"banner",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get banners",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/banner/get-banners/64be4117c111afd6d514a3ae",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"banner",
+								"get-banners",
+								"64be4117c111afd6d514a3ae"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Admin Languages",
+			"item": [
+				{
+					"name": "create language",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Russian\",\r\n  \"image\": \"https://example.com/russian.png\",\r\n  \"code\": \"Rub\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/language/create-language",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"language",
+								"create-language"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get all languages",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/language/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"language",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Language Status Change",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"languageId\": \"64be61a94be9111b332d8da6\",\r\n  \"status\": \"inactive\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/language/update-language-status",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"language",
+								"update-language-status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Languages",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"languageId\": \"64be639b8e12cbe01d42c0a9\",\r\n  \"name\": \"New Language Name\",\r\n  \"image\": \"https://example.com/new_language_image.png\",\r\n  \"code\": \"newcode\",\r\n  \"status\": \"inactive\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/language/update-language",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"language",
+								"update-language"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
