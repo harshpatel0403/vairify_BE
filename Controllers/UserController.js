@@ -1394,7 +1394,7 @@ const uploadFaceVerificationImage = async (req, res) => {
 		if (!faceDetected) {
 			console.log('No faces detected in the image.');
 			return res.status(400).json({
-				message: "No faces detected in the image.",
+				error: "No faces detected in the image.",
 			});
 		}
 
@@ -1538,11 +1538,12 @@ const getUser = async (req, res) => {
 
 const getMarketPlaceUser = async (req, res) => {
 	try {
-		const { userId } = req.params;
-		console.log(userId);
+		const { userId: vaiID } = req.params;
+		console.log(vaiID);
+		const user = await User.findOne({ vaiID });
 		const profiles = await profileDetails.aggregate([
 			{
-				$match: { userId: new mongoose.Types.ObjectId(userId) },
+				$match: { userId: user?._id },
 			},
 			{
 				$lookup: {
@@ -1571,10 +1572,16 @@ const getMarketPlaceUser = async (req, res) => {
 				},
 			},
 			{
-				$unwind: "$userId",
+				$unwind: {
+					path: "$userId",
+					preserveNullAndEmptyArrays: true
+				}
 			},
 			{
-				$unwind: "$services",
+				$unwind: {
+					path: "$services",
+					preserveNullAndEmptyArrays: true
+				}
 			},
 		]);
 

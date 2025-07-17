@@ -19,7 +19,7 @@ const generateRandomCode = () => {
 async function sendSMS(phoneNumber, smsCode, username, token, groupToken, path) {
   try {
     const message = await client.messages.create({
-      body: `${username} has requested you to be one of her Guardians Please click on the link and enter the following ${process.env.REACT_SMS_CODE_URL}/dateguard/join-member-to-group/${path ? `${path}/` : "/"}${token}/${groupToken} Please Enter this code ${smsCode}`,
+      body: `${username} has requested you to be one of her Guardians Please click on the link and enter the following ${process.env.REACT_SMS_CODE_URL}/dateguard/join-member-to-group/${path ? `${path}/` : ""}${token ? `${token}/` : ""}${groupToken ? `${groupToken}` : ""} Please Enter this code ${smsCode}`,
       from: twillioNumber,
       to: phoneNumber,
     });

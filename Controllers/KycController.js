@@ -333,7 +333,8 @@ export const getCheckResult = async (req, res) => {
 		try {
 			let updatedUser;
 			const response = await axios(config);
-			if (response?.data?.status == "complete") {
+			const livenessCheckScore = response?.data?.result?.breakdown?.authenticityAnalysis?.breakdown?.livenessCheckScore;
+			if (response?.data?.status == "complete" && (typeof livenessCheckScore == "number" && livenessCheckScore > 30)) {
 
 				updatedUser = await User.findOneAndUpdate(
 					{ _id: userId },
