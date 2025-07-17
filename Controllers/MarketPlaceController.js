@@ -581,6 +581,9 @@ export const myinvitation = async (req, res) => {
 export const searchFromVairifyId = async (req, res) => {
 	const { id } = req.params;
 
+	console.log('====================================');
+	console.log(id);
+	console.log('====================================');
 	try {
 		const profiles = await profileDetails.aggregate([
 			{
